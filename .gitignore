@@ -39,3 +39,10 @@
 
 # debug information files
 *.dwo
+
+# Visual Studio hidden folder
+.vs
+
+# Visual Studio Preferences
+Mario.vcxproj.filters
+Mario.vcxproj.user
