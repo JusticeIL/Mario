@@ -19,11 +19,23 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Barrel.cpp" />
+    <ClCompile Include="Board.cpp" />
+    <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="Ghost.cpp" />
     <ClCompile Include="HelperFunc.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Mario.cpp" />
+    <ClCompile Include="Menu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Barrel.h" />
+    <ClInclude Include="Board.h" />
+    <ClInclude Include="Enemy.h" />
+    <ClInclude Include="Ghost.h" />
     <ClInclude Include="HelperFunc.h" />
+    <ClInclude Include="Mario.h" />
+    <ClInclude Include="Menu.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
