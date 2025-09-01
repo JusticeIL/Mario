@@ -1,5 +1,6 @@
 #pragma once
-class Barrel
-{
+#include "Enemy.h"
+
+class Barrel : public Enemy {
 };
 
