@@ -1,5 +1,6 @@
 #pragma once
-class Ghost
-{
+#include "Enemy.h"
+
+class Ghost : public Enemy {
 };
 
