@@ -19,29 +19,45 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Asset.cpp" />
     <ClCompile Include="Barrel.cpp" />
+    <ClCompile Include="BarrelFactory.cpp" />
     <ClCompile Include="BigGhost.cpp" />
     <ClCompile Include="Board.cpp" />
+    <ClCompile Include="Character.cpp" />
+    <ClCompile Include="DonkeyKong.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Ghost.cpp" />
+    <ClCompile Include="Hammer.cpp" />
     <ClCompile Include="HelperFunc.cpp" />
+    <ClCompile Include="Item.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mario.cpp" />
     <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="Pauline.cpp" />
     <ClCompile Include="SmallGhost.cpp" />
+    <ClCompile Include="Tiles.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Asset.h" />
     <ClInclude Include="Barrel.h" />
+    <ClInclude Include="BarrelFactory.h" />
     <ClInclude Include="BigGhost.h" />
     <ClInclude Include="Board.h" />
+    <ClInclude Include="Character.h" />
+    <ClInclude Include="DonkeyKong.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Ghost.h" />
+    <ClInclude Include="Hammer.h" />
     <ClInclude Include="HelperFunc.h" />
+    <ClInclude Include="Item.h" />
     <ClInclude Include="Mario.h" />
     <ClInclude Include="Menu.h" />
+    <ClInclude Include="Pauline.h" />
     <ClInclude Include="SmallGhost.h" />
+    <ClInclude Include="Tiles.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
