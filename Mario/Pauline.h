@@ -3,8 +3,10 @@
 
 class Pauline : public Character {
 
-	static constexpr char symbol = '$';
+	
 
 public:
-	Pauline(int x, int y, bool& isColor) : Character(x, y, symbol, isColor) {}
+	Pauline(int x, int y, bool& isColor) : Character(x, y, PAULINE_ICON, isColor) {}
+
+	static constexpr char PAULINE_ICON = '$';
 };
