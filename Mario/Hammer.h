@@ -3,6 +3,8 @@
 
 class Hammer : public Item {
 
+	inline static constexpr const char* HAMMER_COLOR = BROWN;
+
 public:
 	Hammer(int x, int y, bool& isColor) : Item(x, y, HAMMER_ICON, isColor) {}
 
