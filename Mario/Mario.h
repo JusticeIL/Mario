@@ -18,7 +18,9 @@ class Mario : public Character {
 
 	// Constants
 	static constexpr char MARIO_ICON = '@';
+	inline static constexpr const char* MARIO_COLOR = RED;
 	static constexpr char HAMMER_ICON = 'P';
+	inline static constexpr const char* HAMMER_COLOR = BLUE;
 	static constexpr int MAX_JUMP_HEIGHT = 2;
 	static constexpr int MAX_FALL_COUNTER = 5;
 
@@ -72,5 +74,9 @@ public:
 	bool isValid();
 	void resetDir() { currDirX = 0;	currDirY = 0; }
 	void move();
+
+	// Jumping & Falling
+	void jump();
+	void fall();
 	
 };

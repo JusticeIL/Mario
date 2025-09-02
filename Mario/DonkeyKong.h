@@ -1,9 +1,11 @@
 #pragma once
-#include "Character.h"
 #include "BarrelFactory.h"
+#include "Enemy.h"
+#include "Colors.h"
 
 class DonkeyKong : public Enemy {
 
+	inline static constexpr const char* DOKNEYKONG_COLOR = BROWN;
 	BarrelFactory barrelFactory;
 
 public:

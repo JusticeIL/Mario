@@ -5,6 +5,7 @@
 
 class BarrelFactory {
 
+	inline static constexpr const char* BARREL_COLOR = BROWN;
 	bool isColor;
 	int creationPosX;
 	int creationPosY;

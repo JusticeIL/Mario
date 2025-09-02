@@ -3,6 +3,7 @@
 
 class BigGhost : public Ghost {
 
+	inline static constexpr const char* SMALL_GHOST_COLOR = RED;
 	int& marioX;
 	int& marioY;
 
@@ -12,5 +13,4 @@ public:
 	static constexpr char BIG_GHOST_ICON = 'X';
 
 	void move() override;
-	void erase() override;
 };

@@ -46,3 +46,6 @@
 # Visual Studio Preferences
 Mario.vcxproj.filters
 Mario.vcxproj.user
+
+# Visual Studio debug files and folders
+x64

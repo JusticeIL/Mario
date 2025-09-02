@@ -15,7 +15,6 @@ void Mario::updateState() {
 
 	if (!isOnGround && jumping && jumpCounter < MAX_JUMP_HEIGHT) { // Case: continue jumping
 		falling = false;
-		++jumpCounter;
 	}
 	else if (!isOnGround && jumping && jumpCounter >= MAX_JUMP_HEIGHT) {
 		jumping = false;
@@ -51,7 +50,6 @@ void Mario::updateState() {
 		onLadder = false;
 		falling = false;
 		jumping = true;
-		++jumpCounter;
 	}
 
 	if (prevCh == Hammer::HAMMER_ICON) {
@@ -125,19 +123,86 @@ void Mario::move() {
 		int nextPosY = y + currDirY; // Direction in y axis
 		char nextCh = board.getBoardChar(nextPosX, nextPosY);
 		if (jumping) {
-			currDirY = -1;
+			jump();
 		}
 		else if (isOnGround && fallCounter >= MAX_FALL_COUNTER) {
 			dead = true;
 			resetDir();
 		}
 		else if (falling) {
-			currDirX = 0;
-			currDirY = 1;
+			fall();
+		}
+		else { // Case: Mario can walk normally
+			x = nextPosX;
+			y = nextPosY;
 		}
 	}
 	else { // Mario cannot move
 		resetDir();
 	}
+}
 
+void Mario::fall() {
+	// Update direction to fall
+	currDirY = 1;
+
+	int nextPosX = x + currDirX; // Direction in x axis
+	int nextPosY = y + currDirY; // Direction in y axis
+
+	if (board.isWithinBounds(nextPosX, nextPosY)) {
+		char chBelow = board.getBoardChar(nextPosX, nextPosY); //Get char below mario
+
+		if (chBelow == Board::EMPTY) { // On air
+			y += currDirY;
+			x += currDirX;
+			fallCounter++;
+		}
+		else if (Tiles::isTile(chBelow) || chBelow == Board::WALL) { // Going to hit ground after falling
+			isOnGround = true;
+			currDirY = 0;
+			fallCounter = 0;
+			return;
+		}
+		else {
+			resetDir();
+			fallCounter = 0;
+			return;
+		}
+	}
+	else { // Case: hitting the buttom of the board
+		isOnGround = true;
+		currDirY = 0;
+	}
+}
+
+void Mario::jump() {
+
+	currDirY = -1;
+
+	if (jumpCounter < MAX_JUMP_HEIGHT)
+	{
+		int nextPosX = x + currDirX;
+		int nextPosY = y + currDirY;
+
+		if (board.isWithinBounds(nextPosX, nextPosY)) {
+			char nextCh = board.getBoardChar(nextPosX, nextPosY);
+			if (nextCh == Board::EMPTY || nextCh == Board::LADDER) { // The condition might be redundant
+				x = nextPosX;
+				y = nextPosY;
+				++jumpCounter;
+			}
+			else if (Tiles::isTile(nextCh) || nextCh == Board::WALL) // Case: Mario bump his head against the ceiling
+			{	// TODO: This if might be redundant
+				currDirY = 0;
+				jumpCounter = MAX_JUMP_HEIGHT; // Stop jumping
+			}
+			else {
+				jumpCounter = MAX_JUMP_HEIGHT;
+			}
+		}
+		else {
+			jumping = false;
+			jumpCounter = MAX_JUMP_HEIGHT;
+		}
+	}
 }

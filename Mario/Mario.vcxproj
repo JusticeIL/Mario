@@ -46,6 +46,7 @@
     <ClInclude Include="BigGhost.h" />
     <ClInclude Include="Board.h" />
     <ClInclude Include="Character.h" />
+    <ClInclude Include="Colors.h" />
     <ClInclude Include="DonkeyKong.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Game.h" />
@@ -146,6 +147,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

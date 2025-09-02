@@ -3,7 +3,8 @@
 
 class Game {
 
-    bool paused = false;
+    bool paused; // TODO: init in ctor later to false
+    bool isColor; // TODO: init in ctor later to false
 
 public:
 	static constexpr int MAX_X = 80;
