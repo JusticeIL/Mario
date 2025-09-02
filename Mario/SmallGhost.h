@@ -7,5 +7,8 @@ class SmallGhost : public Ghost {
 
 public:
 	SmallGhost(int x, int y, bool& isColor) : Ghost(x, y, symbol, isColor) {}
+
+	void move() override;
+	void erase() override;
 };
 

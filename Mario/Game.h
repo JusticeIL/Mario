@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+
 class Game {
 
     bool paused = false;
@@ -6,6 +8,8 @@ class Game {
 public:
 	static constexpr int MAX_X = 80;
 	static constexpr int MAX_Y = 25;
+    static constexpr int MIN_X = 0;
+    static constexpr int MIN_Y = 0;
 
 	// Game screens
     std::string gameOverScreen =
