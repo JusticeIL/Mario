@@ -3,8 +3,8 @@
 
 class Hammer : public Item {
 
-	static constexpr char symbol = 'p';
-
 public:
-	Hammer(int x, int y, bool& isColor) : Item(x, y, symbol, isColor) {}
+	Hammer(int x, int y, bool& isColor) : Item(x, y, HAMMER_ICON, isColor) {}
+
+	static constexpr char HAMMER_ICON = 'p';
 };
