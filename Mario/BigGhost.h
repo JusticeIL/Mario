@@ -9,4 +9,7 @@ class BigGhost : public Ghost {
 
 public:
 	BigGhost(int x, int y, bool& isColor, int& marioX, int& marioY) : Ghost(x, y, symbol, isColor), marioX(marioX), marioY(marioY) {}
+
+	void move() override;
+	void erase() override;
 };

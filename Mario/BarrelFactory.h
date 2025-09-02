@@ -6,10 +6,34 @@
 class BarrelFactory {
 
 	bool isColor;
-	const int creationPosX;
-	const int creationPosY;
+	int creationPosX;
+	int creationPosY;
+	Board& board;
+
+	enum class BarrelDirection : int { Init = 0, Left = -1, Right = 1, Down = -1 };
+	BarrelDirection barrelDirection = BarrelDirection::Init;
 
 public:
-	BarrelFactory(int dkx, int dky, bool& isColor, std::string level) : isColor(isColor) {} // TODO: implement checking dk pos and decide x,y factory coordinates accordingly
-	Barrel* createBarrel(int x, int y, bool& isColor) {	return new Barrel(x, y, isColor); }
+	BarrelFactory(int dkx, int dky, Board& b, bool& isColor) : board(b), isColor(isColor) {
+		if (board.isWithinBounds(dkx + 1, dky) && board.getBoardChar(dkx + 1, dky) == Board::empty) { // Case: initialize barrel spawn direction to right (if possible)
+			creationPosX = dkx + 1;
+			creationPosY = dky;
+			barrelDirection = BarrelDirection::Right;
+		}
+		else if (board.isWithinBounds(dkx - 1, dky) && board.getBoardChar(dkx - 1, dky) == Board::empty) { // Case: initialize barrel spawn direction to left (if possible)
+			creationPosX = dkx - 1;
+			creationPosY = dky;
+			barrelDirection = BarrelDirection::Left;
+		}
+		else if (board.isWithinBounds(dkx, dky + 1) && board.getBoardChar(dkx, dky + 1) == Board::empty) { // Case: initialize barrel spawn direction to below donkey kong (if possible)
+			creationPosX = dkx;
+			creationPosY = dky + 1;
+			barrelDirection = BarrelDirection::Down;
+		}
+		else { // Case: No valid spawn point, therefore set invalid spawn point
+			creationPosX = Game::MIN_X - 1;
+			creationPosY = Game::MIN_Y - 1;
+		}
+	}
+	Barrel* spawnBarrel(bool& isColor) { return new Barrel(creationPosX, creationPosY, isColor); }
 };
