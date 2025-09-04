@@ -13,11 +13,14 @@ class Mario : public Character {
 		Left = 'a',
 		Down = 'x',
 		Right = 'd',
-		Stay = 's'
+		Stay = 's',
+		PlayHammer = 'p',
+		Init = '\0'
 	};
 
 	// Constants
 	static constexpr char MARIO_ICON = '@';
+	static constexpr char MARIO_HAMMER_ICON = 'M';
 	inline static constexpr const char* MARIO_COLOR = RED;
 	static constexpr char HAMMER_ICON = 'P';
 	inline static constexpr const char* HAMMER_COLOR = BLUE;
@@ -29,14 +32,12 @@ class Mario : public Character {
 	int currDirY;
 	int prevPosX;
 	int prevPosY;
+	int startPosX;
+	int startPosY;
 	char prevCh;
-	char chBelow;
 	Key pressedkey;
 
 	// Hammer handling
-	int hammerPos_x[2];
-	int hammerPos_y[2];
-	char prevHammerChars[3];
 	bool withHammer;
 	bool hammerUsed;
 
@@ -55,28 +56,32 @@ class Mario : public Character {
 	// Board
 	const Board& board;
 
+	// Hammer
+	Hammer* hammer;
+
 public:
 	Mario(int x, int y, Board& b, bool& isColor) : Character(x, y, MARIO_ICON, isColor), board(b),
-		currDirX(0), currDirY(0), prevPosX(0), prevPosY(0),prevCh(Board::EMPTY), chBelow('\0'), pressedkey(Key::Stay),
+		currDirX(0), currDirY(0), prevPosX(0), prevPosY(0), startPosX(x), startPosY(y), prevCh(Board::EMPTY), pressedkey(Key::Stay),
 		withHammer(false), hammerUsed(false),
 		jumpCounter(0), fallCounter(0), isOnGround(true), jumping(false), onLadder(false), falling(false),
-		dead(false), winCon(false)	{
-
-		std::memset(hammerPos_x, 0, sizeof(hammerPos_x));
-		std::memset(hammerPos_y, 0, sizeof(hammerPos_y));
-		std::memset(prevHammerChars, '\0', sizeof(prevHammerChars));
-	}
+		dead(false), winCon(false),
+		hammer(nullptr)	{}
 
 	int getMarioX() const { return x; }
 	int getMarioY() const { return y; }
 
+	void setPressedKey(char ch);
 	void updateState();
 	bool isValid();
 	void resetDir() { currDirX = 0;	currDirY = 0; }
 	void move();
+	void reset();
 
 	// Jumping & Falling
 	void jump();
 	void fall();
-	
+
+	// Hammer management
+	void useHammer();
+	void resetHammer();
 };

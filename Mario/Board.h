@@ -16,5 +16,6 @@ public:
 	
 	bool isWithinBounds(int x, int y) const { return (Game::MIN_X <= x && x < Game::MAX_X && Game::MIN_Y <= y && y < Game::MAX_Y); }
 	char getBoardChar(int x, int y) const { return level[y][x]; }
+	void setBoardChar(int x, int y, char ch) { level[y][x] = ch; }
 };
 
