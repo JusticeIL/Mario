@@ -8,6 +8,30 @@
 #include "BigGhost.h"
 #include "DonkeyKong.h"
 
+void Mario::setPressedKey(char key) {
+	key = tolower(key);
+	switch (static_cast<Key>(key)) {
+	case Key::Up:
+		pressedkey = Key::Up;
+		break;
+	case Key::Left:
+		pressedkey = Key::Left;
+		break;
+	case Key::Down:
+		pressedkey = Key::Down;
+		break;
+	case Key::Right:
+		pressedkey = Key::Right;
+		break;
+	case Key::Stay:
+		pressedkey = Key::Stay;
+		break;
+	default:
+		pressedkey = Key::Stay;
+		break;
+	}
+}
+
 void Mario::updateState() {
 	char chBelow = board.getBoardChar(x, y + 1);
 	char chAbove = board.getBoardChar(x, y - 1);
@@ -205,4 +229,47 @@ void Mario::jump() {
 			jumpCounter = MAX_JUMP_HEIGHT;
 		}
 	}
+}
+
+void Mario::useHammer() {
+	hammer->use(x, y, currDirX, currDirY, &hammerUsed);
+
+	if (hammerUsed) {
+		pressedkey = Key::Init; // Reset pressed key after using the hammer
+	}
+
+	hammerUsed = false;
+}
+
+void Mario::resetHammer() {
+	hammer->reset();
+	withHammer = false;
+}
+
+void Mario::reset() {
+	// Reset position
+	resetDir();
+	x = startPosX;
+	y = startPosY;
+	prevCh = Board::EMPTY;
+
+	// Reset input
+	pressedkey = Key::Init;
+
+	// Hammer state
+	withHammer = false;
+	hammerUsed = false;
+	hammer->reset();
+
+	// Jump / fall / ladder state
+	jumpCounter = 0;
+	fallCounter = 0;
+	isOnGround = true;
+	jumping = false;
+	onLadder = false;
+	falling = false;
+
+	// Game state
+	dead = false;
+	winCon = false;
 }
