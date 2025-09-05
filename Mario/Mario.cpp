@@ -140,6 +140,9 @@ bool Mario::isValid() {
 }
 
 void Mario::move() {
+	eraseFromBoard();
+	eraseFromConsole();
+
 	bool canMove = isValid();
 	
 	if (canMove) {
@@ -150,7 +153,7 @@ void Mario::move() {
 			jump();
 		}
 		else if (isOnGround && fallCounter >= MAX_FALL_COUNTER) {
-			dead = true;
+			isDead = true;
 			resetDir();
 		}
 		else if (falling) {
@@ -164,6 +167,9 @@ void Mario::move() {
 	else { // Mario cannot move
 		resetDir();
 	}
+
+	drawToBoard();
+	drawToConsole();
 }
 
 void Mario::fall() {
@@ -270,6 +276,6 @@ void Mario::reset() {
 	falling = false;
 
 	// Game state
-	dead = false;
+	isDead = false;
 	winCon = false;
 }

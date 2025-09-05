@@ -1,10 +1,15 @@
 #pragma once
+#include <iostream>
 #include <string>
+#include <vector>
+#include "Ghost.h"
 
 class Game {
 
     bool paused; // TODO: init in ctor later to false
     bool isColor; // TODO: init in ctor later to false
+    std::list<Barrel> barrels;
+    std::vector<std::unique_ptr<Ghost>> ghosts;
 
 public:
 	static constexpr int MAX_X = 80;
@@ -86,4 +91,13 @@ public:
         "                                                                               \n"
         "                                Congratulations!                               \n"
         "                              ON TO THE NEXT STAGE!                              ";
+
+    // Barrels management
+    void updateBarrels();
+    void resetBarrels();
+
+    // Ghosts management
+    static void readGhostsFromBoard(Board& b, long int seed);
+    static void updateGhosts();
+    static void deleteAllGhosts();
 };
