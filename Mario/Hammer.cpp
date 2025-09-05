@@ -77,4 +77,5 @@ void Hammer::reset() {
 	std::memset(hammerPos_x, -1, sizeof(hammerPos_x)); // Reset to an invalid position
 	std::memset(hammerPos_y, -1, sizeof(hammerPos_y)); // Reset to an invalid position
 	std::memset(prevHammerChars, Board::EMPTY, sizeof(prevHammerChars)); // Reset previous chars to empty
+	isCollected = false;
 }

@@ -36,5 +36,5 @@ public:
 			creationPosY = Game::MIN_Y - 1;
 		}
 	}
-	Barrel* spawnBarrel(bool& isColor) { return new Barrel(creationPosX, creationPosY, isColor); }
+	Barrel* spawnBarrel(bool& isColor) { return new Barrel(creationPosX, creationPosY, isColor, board); }
 };
