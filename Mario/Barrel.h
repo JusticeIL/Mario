@@ -1,7 +1,5 @@
 #pragma once
 #include "Enemy.h"
-#include "Colors.h"
-#include <list>
 
 class Barrel : public Enemy {
 
@@ -21,10 +19,10 @@ class Barrel : public Enemy {
 
 	// Explosion FX
 	void savePreviousCharsExplosion();
-	void create_first_radius_exp();
-	void delete_first_radius_exp();
-	void create_second_radius_exp();
-	void restorePrevChars();
+	void create_first_radius_exp() const;
+	void delete_first_radius_exp() const;
+	void create_second_radius_exp() const;
+	void restorePrevChars() const;
 
 	friend class BarrelFactory;
 
@@ -33,9 +31,8 @@ public:
 
 	// Barrel movement
 	void move() override;
-	bool isValid() override;
 	void setDirection();
-	void fall(bool canBarrelMove);
+	void fall();
 
 	void explode();
 };

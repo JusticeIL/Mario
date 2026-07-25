@@ -82,7 +82,7 @@ void Mario::updateState() {
 
 }
 
-bool Mario::isValid() {
+bool Mario::isValidToMove() {
 	updateState();
 
 	int nextPosX = x + currDirX; // Direction in x axis
@@ -143,7 +143,7 @@ void Mario::move() {
 	eraseFromBoard();
 	eraseFromConsole();
 
-	bool canMove = isValid();
+	bool canMove = isValidToMove();
 	
 	if (canMove) {
 		int nextPosX = x + currDirX; // Direction in x axis

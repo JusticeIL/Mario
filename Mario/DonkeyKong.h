@@ -5,12 +5,17 @@
 
 class DonkeyKong : public Enemy {
 
-	inline static constexpr const char* DOKNEYKONG_COLOR = BROWN;
+	static constexpr const char* DONKEYKONG_COLOR = BROWN;
 	BarrelFactory barrelFactory;
 
 public:
-	DonkeyKong(int x, int y, bool& isColor, Board& board) : Enemy(x, y, DONKEY_KONG_ICON, isColor, board), barrelFactory(x, y, board, isColor) {}
+	DonkeyKong(int x, int y, bool& isColor, Board& board) : Enemy(x, y, DONKEY_KONG_ICON, isColor, board),
+		barrelFactory(x, y, board, isColor) {
+		currDirX = 0;
+		currDirY = 0;
+	}
 
 	static constexpr char DONKEY_KONG_ICON = '&';
-	bool isValid() override {}
+
+	Barrel* createBarrel() const { return barrelFactory.spawnBarrel(); }
 };

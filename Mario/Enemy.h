@@ -12,6 +12,7 @@ public:
 
 	bool isHitMario(int marioX, int marioY) const { return (x == marioX && y == marioY); }
 
+	void executeMove(bool canMove);
 	virtual void move() = 0;
-	
+	bool isValidToMove() override;
 };

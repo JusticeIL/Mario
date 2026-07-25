@@ -2,11 +2,13 @@
 #include <string>
 #include "Barrel.h"
 #include "Board.h"
+#include "Colors.h"
+#include "GameManager.h"
 
 class BarrelFactory {
 
-	inline static constexpr const char* BARREL_COLOR = BROWN;
-	bool isColor;
+	static constexpr const char* BARREL_COLOR = BROWN;
+	bool& isColor;
 	int creationPosX;
 	int creationPosY;
 	Board& board;
@@ -15,7 +17,7 @@ class BarrelFactory {
 	BarrelDirection barrelDirection = BarrelDirection::Init;
 
 public:
-	BarrelFactory(int dkx, int dky, Board& b, bool& isColor) : board(b), isColor(isColor) {
+	BarrelFactory(int dkx, int dky, Board& b, bool& isColor) : isColor(isColor), board(b) {
 		if (board.isWithinBounds(dkx + 1, dky) && board.getBoardChar(dkx + 1, dky) == Board::EMPTY) { // Case: initialize barrel spawn direction to right (if possible)
 			creationPosX = dkx + 1;
 			creationPosY = dky;
@@ -36,5 +38,5 @@ public:
 			creationPosY = Game::MIN_Y - 1;
 		}
 	}
-	Barrel* spawnBarrel(bool& isColor) { return new Barrel(creationPosX, creationPosY, isColor, board); }
+	Barrel* spawnBarrel() const { return new Barrel(creationPosX, creationPosY, isColor, board); }
 };

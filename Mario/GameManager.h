@@ -1,8 +1,13 @@
 #pragma once
 #include <iostream>
+#include <list>
 #include <string>
 #include <vector>
 #include "Ghost.h"
+
+// Forward declarations
+class Board;
+class Barrel;
 
 class Game {
 

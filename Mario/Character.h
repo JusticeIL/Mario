@@ -1,5 +1,6 @@
 #pragma once
 #include "Asset.h"
+#include "Board.h"
 
 class Character : public Asset {
 
@@ -8,13 +9,11 @@ protected:
 	void drawToConsole() const override;
 	void drawToBoard() override;
 	void eraseFromConsole() const override;
-	void eraseFromBoard() override;
 
 public:
 	Character(int x, int y, char symbol, bool& isColor, Board& b) : Asset(x, y, symbol, isColor, b),
 		isDead(false) {}
 	virtual ~Character() = default;
 
-	virtual bool isValid() = 0;
+	virtual bool isValidToMove() = 0;
 };
-
