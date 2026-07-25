@@ -1,6 +1,6 @@
 #pragma once
 #include "Character.h"
-#include <set>
+#include "Hammer.h"
 
 // Forward declaration
 class Board;
@@ -25,8 +25,6 @@ class Mario : public Character {
 	static constexpr int MAX_FALL_COUNTER = 5;
 
 	// Mario's position and movement
-	int prevPosX;
-	int prevPosY;
 	int startPosX;
 	int startPosY;
 	Key pressedkey;
@@ -68,7 +66,7 @@ public:
 
 	void setPressedKey(char ch);
 	void updateState();
-	bool isValid() override;
+	bool isValidToMove() override;
 	void resetDir() { currDirX = 0;	currDirY = 0; }
 	void move();
 	void reset();

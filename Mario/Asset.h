@@ -4,8 +4,10 @@
 class Asset {
 
 protected:
+	int prevPosX;
 	int x;
 	int currDirX;
+	int prevPosY;
 	int y;
 	int currDirY;
 	char prevCh;
@@ -16,8 +18,8 @@ protected:
 	// Board
 	Board& board;
 
-	Asset(int x, int y, char symbol, bool& isColor, Board& b) : x(x), y(y), icon(symbol), isColor(isColor), prevCh(Board::EMPTY), currDirX(0), currDirY(0),
-		board(b) {}
+	Asset(int x, int y, char symbol, bool& isColor, Board& b) : prevPosX(-1), x(x), currDirX(0), prevPosY(-1), y(y), currDirY(0), prevCh(Board::EMPTY),
+		icon(symbol), isColor(isColor), color(nullptr),	board(b) {}
 
 public:
 	virtual ~Asset() {
@@ -25,8 +27,9 @@ public:
 		eraseFromConsole();
 	}
 
+	void calculatePrevPos();
 	virtual void drawToConsole() const = 0;
 	virtual void drawToBoard() = 0;
 	virtual void eraseFromConsole() const = 0;
-	virtual void eraseFromBoard() = 0;
+	void eraseFromBoard() const { board.setBoardChar(prevPosX, prevPosY, prevCh); }
 };

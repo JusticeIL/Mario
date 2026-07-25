@@ -23,10 +23,6 @@ void Character::drawToConsole() const {
 }
 
 void Character::eraseFromConsole() const {
-		gotoxy(x, y);
-		std::cout << prevCh;
-}
-
-void Character::eraseFromBoard() {
-		board.setBoardChar(x, y, prevCh);
+	gotoxy(prevPosX, prevPosY);
+	std::cout << prevCh;
 }
