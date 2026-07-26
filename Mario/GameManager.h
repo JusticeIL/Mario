@@ -10,7 +10,7 @@
 class Board;
 class Barrel;
 
-class Game {
+class GameManager {
 
     bool paused; // TODO: init in ctor later to false
     bool isColor; // TODO: init in ctor later to false
@@ -110,6 +110,12 @@ class Game {
         "                              ON TO THE NEXT STAGE!                              ";
 
 public:
+
+    GameManager(Menu& M, Board& B) : menu(M), board(B) { // Constructor
+        paused = false;
+		isColor = false;
+    }
+
     static constexpr int MAX_X = 80;
     static constexpr int MAX_Y = 25;
     static constexpr int MIN_X = 0;
