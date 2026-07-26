@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "Ghost.h"
+#include "Menu.h"
 
 // Forward declarations
 class Board;
@@ -16,11 +17,22 @@ class Game {
     std::list<Barrel> barrels;
     std::vector<std::unique_ptr<Ghost>> ghosts;
 
-public:
-	static constexpr int MAX_X = 80;
-	static constexpr int MAX_Y = 25;
-    static constexpr int MIN_X = 0;
-    static constexpr int MIN_Y = 0;
+    // Constants
+    static constexpr int EASY = 2;
+    static constexpr int HARD = 3;
+
+    // Data Members
+    char choiceHolder = '\0';
+    bool firstPrint = false;
+    int difficultyLevel = EASY;
+
+    // References to game objects
+    Menu& menu;
+    Board& board;
+
+    // Game State Management
+    enum class GameState { Standby, Playing, Pause, GameOver, Instructions, Options, Colors, Exit, GameWon };
+    GameState State = GameState::Standby;
 
 	// Game screens
     std::string gameOverScreen =
@@ -96,6 +108,12 @@ public:
         "                                                                               \n"
         "                                Congratulations!                               \n"
         "                              ON TO THE NEXT STAGE!                              ";
+
+public:
+    static constexpr int MAX_X = 80;
+    static constexpr int MAX_Y = 25;
+    static constexpr int MIN_X = 0;
+    static constexpr int MIN_Y = 0;
 
     // Barrels management
     void updateBarrels();

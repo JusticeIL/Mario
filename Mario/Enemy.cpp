@@ -5,13 +5,6 @@
 #include "SmallGhost.h"
 #include "Tiles.h"
 
-void Enemy::executeMove(bool canMove) {
-	if (canMove) {
-		x += currDirX;
-		y += currDirY;
-	}
-}
-
 bool Enemy::isValidToMove() {
 	int nextPosX = x + currDirX;
 	int nextPosY = y + currDirY;

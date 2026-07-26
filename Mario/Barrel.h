@@ -1,7 +1,7 @@
 #pragma once
-#include "Enemy.h"
+#include "MovingEnemy.h"
 
-class Barrel : public Enemy {
+class Barrel : public MovingEnemy {
 
 	static constexpr unsigned int EXPLOSION_DELAY_MS = 50;
 
@@ -12,7 +12,7 @@ class Barrel : public Enemy {
 	int lastDir_x;
 	char prevChars[3][5];
 
-	Barrel(int x, int y, bool& isColor, Board& b) : Enemy(x, y, BARREL_ICON, isColor, b),
+	Barrel(int x, int y, bool& isColor, Board& b) : MovingEnemy(x, y, BARREL_ICON, isColor, b),
 		fallCounter(0), isOnAir(false), isExploded(false), lastDir_x(0)	{
 		std::memset(prevChars, '\0', sizeof(prevChars));
 	}
