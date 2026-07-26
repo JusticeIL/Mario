@@ -35,6 +35,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mario.cpp" />
     <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="MovingEnemy.cpp" />
     <ClCompile Include="Pauline.cpp" />
     <ClCompile Include="SmallGhost.cpp" />
     <ClCompile Include="Tiles.cpp" />
@@ -56,6 +57,7 @@
     <ClInclude Include="Item.h" />
     <ClInclude Include="Mario.h" />
     <ClInclude Include="Menu.h" />
+    <ClInclude Include="MovingEnemy.h" />
     <ClInclude Include="Pauline.h" />
     <ClInclude Include="SmallGhost.h" />
     <ClInclude Include="Tiles.h" />
