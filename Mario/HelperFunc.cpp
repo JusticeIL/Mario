@@ -19,3 +19,8 @@ void ShowConsoleCursor(bool showFlag) {
     cursorInfo.bVisible = showFlag; // Set the cursor visibility
     SetConsoleCursorInfo(out, &cursorInfo);
 }
+
+// This function clears the screen
+void clearScr() {
+    system("cls");
+}

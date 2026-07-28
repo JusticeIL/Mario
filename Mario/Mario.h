@@ -19,8 +19,8 @@ class Mario : public Character {
 	};
 
 	// Constants
-	inline static constexpr const char* MARIO_COLOR = RED;
-	inline static constexpr const char* HAMMER_COLOR = BLUE;
+	static constexpr const char* MARIO_COLOR = RED;
+	static constexpr const char* HAMMER_COLOR = BLUE;
 	static constexpr int MAX_JUMP_HEIGHT = 2;
 	static constexpr int MAX_FALL_COUNTER = 5;
 
@@ -28,6 +28,9 @@ class Mario : public Character {
 	int startPosX;
 	int startPosY;
 	Key pressedkey;
+
+	// Life
+	unsigned int life;
 
 	// Hammer handling
 	bool withHammer;
@@ -41,18 +44,15 @@ class Mario : public Character {
 	bool onLadder;
 	bool falling;
 
-	// Game state
-	bool winCon;
-
 	// Hammer
 	Hammer* hammer;
 
 public:
 	Mario(int x, int y, Board& b, bool& isColor) : Character(x, y, MARIO_ICON, isColor, b),
 		prevPosX(0), prevPosY(0), startPosX(x), startPosY(y), pressedkey(Key::Stay),
+		life(3),
 		withHammer(false), hammerUsed(false),
 		jumpCounter(0), fallCounter(0), isOnGround(true), jumping(false), onLadder(false), falling(false),
-		winCon(false),
 		hammer(nullptr)	{}
 
 	static constexpr char MARIO_ICON = '@';
@@ -74,6 +74,10 @@ public:
 	// Jumping & Falling
 	void jump();
 	void fall();
+
+	// Life management
+	unsigned int marioLifePoints() const { return life; }
+	void decreaseLife() { --life; }
 
 	// Hammer management
 	void pickUpHammer(Hammer* h) { hammer = h; withHammer = true; hammer->setCollected(); icon = MARIO_HAMMER_ICON; }

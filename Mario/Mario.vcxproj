@@ -32,11 +32,13 @@
     <ClCompile Include="Hammer.cpp" />
     <ClCompile Include="HelperFunc.cpp" />
     <ClCompile Include="Item.cpp" />
+    <ClCompile Include="Level.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mario.cpp" />
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="MovingEnemy.cpp" />
     <ClCompile Include="Pauline.cpp" />
+    <ClCompile Include="ScreenLoader.cpp" />
     <ClCompile Include="SmallGhost.cpp" />
     <ClCompile Include="Tiles.cpp" />
   </ItemGroup>
@@ -55,10 +57,12 @@
     <ClInclude Include="Hammer.h" />
     <ClInclude Include="HelperFunc.h" />
     <ClInclude Include="Item.h" />
+    <ClInclude Include="Level.h" />
     <ClInclude Include="Mario.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="MovingEnemy.h" />
     <ClInclude Include="Pauline.h" />
+    <ClInclude Include="ScreenLoader.h" />
     <ClInclude Include="SmallGhost.h" />
     <ClInclude Include="Tiles.h" />
   </ItemGroup>

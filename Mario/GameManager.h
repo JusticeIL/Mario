@@ -2,9 +2,17 @@
 #include <iostream>
 #include <list>
 #include <string>
+#include <unordered_map>
 #include <vector>
+
+#include "DonkeyKong.h"
 #include "Ghost.h"
+#include "HelperFunc.h"
 #include "Menu.h"
+#include "Level.h"
+#include "Mario.h"
+#include "Pauline.h"
+#include "ScreenLoader.h"
 
 // Forward declarations
 class Board;
@@ -12,27 +20,31 @@ class Barrel;
 
 class GameManager {
 
-    bool paused; // TODO: init in ctor later to false
-    bool isColor; // TODO: init in ctor later to false
-    std::list<Barrel> barrels;
-    std::vector<std::unique_ptr<Ghost>> ghosts;
-
-    // Constants
-    static constexpr int EASY = 2;
-    static constexpr int HARD = 3;
-
     // Data Members
-    char choiceHolder = '\0';
-    bool firstPrint = false;
-    int difficultyLevel = EASY;
+    char choiceHolder;
+    bool firstPrint;
+    bool gameStart;
+    bool paused;
+    bool isColor;
+    int ticks;
 
     // References to game objects
     Menu& menu;
+    ScreenLoader screenLoader;
     Board& board;
+    Mario* mario;
+    Pauline* pauline;
+    DonkeyKong* donkeyKong;
+    std::list<Barrel> barrels;
+    std::vector<std::unique_ptr<Ghost>> ghosts;
+    std::list<Level> levels;
 
     // Game State Management
-    enum class GameState { Standby, Playing, Pause, GameOver, Instructions, Options, Colors, Exit, GameWon };
-    GameState State = GameState::Standby;
+    enum class GameState { Standby, Playing, Pause, GameOver, Instructions, Options, Exit, GameWon };
+    GameState state = GameState::Standby;
+    enum class Difficulty { Easy, Hard };
+    Difficulty difficultyLevel = Difficulty::Easy;
+    std::unordered_map<std::string, std::string> error_log;
 
 	// Game screens
     std::string gameOverScreen =
@@ -109,24 +121,56 @@ class GameManager {
         "                                Congratulations!                               \n"
         "                              ON TO THE NEXT STAGE!                              ";
 
+    unsigned int randomizeSeedForSmallGhost();
+    void resetEnemies();
+    bool checkWinCondition() { return pauline->checkWinCondition(); }
+    void updateBarrels();
+    void updateGhosts();
+    void donkeyKongThrowsNewBarrel() { barrels.push_back(*donkeyKong->createBarrel()); }
+    bool checkIfMarioHit();
+    void resetGameAfterMarioDeath();
+    void handleMarioDeath();
+
 public:
 
     GameManager(Menu& M, Board& B) : menu(M), board(B) { // Constructor
-        paused = false;
+        mario = nullptr;
+		pauline = nullptr;
+        donkeyKong = nullptr;
+        choiceHolder = '\0';
+        firstPrint = false;
+        gameStart = false;
+    	paused = false;
 		isColor = false;
+        ticks = 0;
     }
 
+    // Constants
     static constexpr int MAX_X = 80;
     static constexpr int MAX_Y = 25;
     static constexpr int MIN_X = 0;
     static constexpr int MIN_Y = 0;
+    static constexpr char PLAY = '1';
+    static constexpr char OPTIONS = '2';
+    static constexpr char INSTRUCTIONS = '3';
+    static constexpr char ESC = 27;
+    static constexpr char QUIT = 27;
+
+    // Game Flow & State Management
+    void run();
+    void playGame();
+    void printScreens();
+    void handleState();
+    void gameOverLogic();
+    void gameWonLogic();
+    void gameReset();
+    void terminatePause() { clearScr(); firstPrint = true; }
+    void printPauseScreen() const { std::cout << pauseScreen; }
+    void loadAllScreens();
 
     // Barrels management
-    void updateBarrels();
     void resetBarrels();
 
     // Ghosts management
-    static void readGhostsFromBoard(Board& b, long int seed);
-    static void updateGhosts();
-    static void deleteAllGhosts();
+    void readGhostsFromBoard(unsigned int seed);
 };

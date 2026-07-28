@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "Game.h"
+#include "GameManager.h"
 class Menu {
 
 	// Constants for menu layout and options
@@ -14,20 +14,20 @@ class Menu {
 	struct menuArrowPos { int x; int y; }; // Has to be positioned here to maintain the constexpr compiling
 
 	// Positions of menu options
-	static constexpr menuArrowPos GAME = { 7,15 };
+	static constexpr menuArrowPos PLAY = { 7,15 };
 	static constexpr menuArrowPos OPTIONS = { 7,17 };
 	static constexpr menuArrowPos INSTRUCTIONS = { 7,19 };
 	static constexpr menuArrowPos EXIT = { 7,21 };
-	static constexpr menuArrowPos positions[] = { GAME, OPTIONS, INSTRUCTIONS, EXIT };
+	static constexpr menuArrowPos positions[] = { PLAY, OPTIONS, INSTRUCTIONS, EXIT };
 
 	// Menu-related variables
-	char menuChar = '\0';
-	bool isArrow = false;
-	bool MenuChoice = false;
+    bool chosen;
+	char menuChar;
+	bool isArrow;
+	bool MenuChoice;
 
-public:
     // Menu layout
-    std::string mainMenu[Game::MAX_Y][Game::MAX_X + 1] = { //+1 for \0 TODO later, change from const chat to string
+    std::string mainMenu[GameManager::MAX_Y][GameManager::MAX_X + 1] = { //+1 for \0 TODO later, change from const chat to string
         //01234567890123456789012345678901234567890123456789012345678901234567890123456789
          "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", // 0
          "Q                                                                             Q", // 1
@@ -91,7 +91,7 @@ public:
         "Q                                    Options:                                 Q\n"
         "Q                                    _______                                  Q\n"
         "Q                                                                             Q\n"
-        "Q                          [5] Colors                                         Q\n"
+        "Q                          [5] Colors [   ]                                   Q\n"
         "Q                          [6] Console log                                    Q\n"
         "Q                          [7] difficulty level :                             Q\n"
         "Q                                                                             Q\n"
@@ -138,4 +138,29 @@ public:
         "Q                                                                             Q\n"
         "Q                                                                             Q\n"
         "Q=============================================================================Q";
+
+public:
+    Menu() { // Constructor
+        chosen = false;
+        menuChar = '\0';
+        isArrow = false;
+        MenuChoice = false;
+    }
+
+    // Menu Display
+    void printMainMenu() const;
+    void printInstructionsScreen() const { std::cout << instructionsScreen; }
+    void printOptionsScreen() const { std::cout << optionsScreen; }
+    char handleMenu();
+    void printOKInGreen(int x, int y) const;
+
+    // Menu Navigation
+    void MoveArrow(char numKey) const;
+    void resetAllArrows() const;
+    void ChangeisArrowChoice() { isArrow = true; }
+    void ChangeMenuChar(char ch) { menuChar = ch; }
+    void ResetMenu() { menuChar = '\0'; chosen = false; }
+
+    // Getters
+    bool GetMenuChoice() const { return chosen; }
 };
