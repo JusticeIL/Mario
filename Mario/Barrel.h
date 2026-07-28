@@ -8,12 +8,11 @@ class Barrel : public MovingEnemy {
 	// State variables
 	unsigned int fallCounter;
 	bool isOnAir;
-	bool isExploded;
 	int lastDir_x;
 	char prevChars[3][5];
 
 	Barrel(int x, int y, bool& isColor, Board& b) : MovingEnemy(x, y, BARREL_ICON, isColor, b),
-		fallCounter(0), isOnAir(false), isExploded(false), lastDir_x(0)	{
+		fallCounter(0), isOnAir(false), lastDir_x(0)	{
 		std::memset(prevChars, '\0', sizeof(prevChars));
 	}
 
@@ -34,5 +33,7 @@ public:
 	void setDirection();
 	void fall();
 
+	// Barrel explosion handling
 	void explode();
+	bool isExploded() const { return isDead; }
 };

@@ -277,5 +277,4 @@ void Mario::reset() {
 
 	// Game state
 	isDead = false;
-	winCon = false;
 }

@@ -39,3 +39,10 @@ bool Enemy::isValidToMove() {
 		return false;
 	}
 }
+
+void Enemy::updateIfHitMario(int marioX, int marioY) {
+	int nextPosX = x + currDirX;
+	int nextPosY = y + currDirY;
+
+	isEnemyHitMario = (nextPosX == marioX && nextPosY == marioY);
+}

@@ -10,7 +10,7 @@ class SmallGhost : public Ghost {
 	static constexpr const char* SMALL_GHOST_COLOR = RED;
 
 	// Seed variables
-	long int savedSeed; // Stores the seed; 0 means uninitialized
+	unsigned int savedSeed;
 	std::mt19937 gen; // Random number generator
 	std::uniform_int_distribution<int> dist; // Uniform distribution
 
@@ -18,7 +18,7 @@ class SmallGhost : public Ghost {
 
 public:
 	SmallGhost(int x, int y, bool& isColor, Board& b, unsigned int seed) : Ghost(x, y, SMALL_GHOST_ICON, isColor, b),
-		savedSeed(0), gen(seed), dist(1, 100) {
+		savedSeed(seed), gen(seed), dist(1, 100) {
 		currDirX = 1; // Initial direction to the right after parent initialization
 	}
 

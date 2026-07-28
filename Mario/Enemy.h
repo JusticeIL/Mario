@@ -10,6 +10,7 @@ public:
 	Enemy(int x, int y, char symbol, bool& isColor, Board& b) : Character(x, y, symbol, isColor, b),
 		isEnemyHitMario(false) {}
 
-	bool isHitMario(int marioX, int marioY) const { return (x == marioX && y == marioY); }
-	bool isValidToMove() override;
+	bool isHitMario() const { return isEnemyHitMario; }
+	void updateIfHitMario(int marioX, int marioY);
+	virtual bool isValidToMove();
 };

@@ -10,4 +10,11 @@ void MovingEnemy::executeMove(bool canMove) {
 		x += currDirX;
 		y += currDirY;
 	}
+
+	// TODO: implement updateIfDead() here
+}
+void MovingEnemy::updateIfDead(int hammerX, int hammerY) {
+	int nextPosX = x + currDirX;
+	int nextPosY = y + currDirY;
+	isDead = (x == hammerX && y == hammerY);
 }

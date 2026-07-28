@@ -15,5 +15,5 @@ public:
 		isDead(false) {}
 	virtual ~Character() = default;
 
-	virtual bool isValidToMove() = 0;
+	bool amIDead() const { return isDead; }
 };

@@ -204,7 +204,7 @@ void Barrel::setDirection() {
 }
 
 void Barrel::fall() {
-	if (fallCounter >= 8 && (!isOnAir || y == (Game::MAX_Y - 1))) {
+	if (fallCounter >= 8 && (!isOnAir || y == (GameManager::MAX_Y - 1))) {
 		explode();
 		return;
 	}
@@ -236,5 +236,5 @@ void Barrel::explode() {
 	create_second_radius_exp();
 	restorePrevChars();
 
-	isExploded = true; // End of explosion
+	isDead = true; // End of explosion
 }

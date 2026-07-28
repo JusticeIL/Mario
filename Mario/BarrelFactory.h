@@ -34,8 +34,8 @@ public:
 			barrelDirection = BarrelDirection::Down;
 		}
 		else { // Case: No valid spawn point, therefore set invalid spawn point
-			creationPosX = Game::MIN_X - 1;
-			creationPosY = Game::MIN_Y - 1;
+			creationPosX = GameManager::MIN_X - 1;
+			creationPosY = GameManager::MIN_Y - 1;
 		}
 	}
 	Barrel* spawnBarrel() const { return new Barrel(creationPosX, creationPosY, isColor, board); }
