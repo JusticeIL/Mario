@@ -4,6 +4,9 @@
 #include <random>
 #include <windows.h>
 
+#include "BigGhost.h"
+#include "SmallGhost.h"
+
 // This function manages the main game loop, handles transitions between different game states, and coordinates user inputs and game actions
 void GameManager::run() {
 
@@ -202,8 +205,11 @@ void GameManager::playGame() {
 		pauline->updateWinCondition(mario->getMarioX(), mario->getMarioY());
 		if (checkWinCondition())
 			state = GameState::GameWon;
-		else if (checkIfMarioHit())
-			handleMarioDeath();
+		else {
+			auto report = checkIfMarioHit();
+			if (report.source != DamageSource::None)
+				handleMarioDeath();
+		}
 		
 		Sleep(difficultyLevel == Difficulty::Hard ? 50 : 150);
 		ticks++;
@@ -220,67 +226,87 @@ unsigned int GameManager::randomizeSeedForSmallGhost() {
 }
 
 void GameManager::updateBarrels() {
-	for (auto& barrel : barrels) {
-		barrel.move();
+	for (auto barrelIterator = barrels.begin(); barrelIterator != barrels.end();) {
+		barrelIterator->move();
 
 		// TODO: handle game logic if we know we hit mario!
 
-		if (barrel.isExploded()) 
-			barrels.remove(barrel);
+		if (barrelIterator->isExploded())
+			barrelIterator = barrels.erase(barrelIterator);
+		else
+			++barrelIterator;
 	}
 }
 
 void GameManager::updateGhosts() {
-	for (auto& ghost : ghosts) {
-		ghost->move();
+	for (auto ghostIterator = ghosts.begin(); ghostIterator != ghosts.end();) {
+		(*ghostIterator)->move();
 
 		// TODO: handle game logic if we know we hit mario!
 
-		if (ghost->amIDead())
-			std::erase(ghosts, ghost);
+		if ((*ghostIterator)->amIDead())
+			ghostIterator = ghosts.erase(ghostIterator);
+		else
+			++ghostIterator;
 	}
 }
 
 void GameManager::resetEnemies() {
-	screenLoader.readGhosts(board.getLevel());
-	screenLoader.findDonkeyKongLocation(board.getLevel());
-	screenLoader.initializeSpawnPointForBarrel(board.getLevel());
+	barrels.clear();
+	ghosts.clear();
+
+	readGhosts(board.getLevel());
+	initializeDonkeyKong(board.getLevel());
 }
 
-bool GameManager::checkIfMarioHit() {
+void GameManager::readGhosts(const Level& level) {
+	const auto& lvl = level.getOriginalLevel();
+	const auto& ghostSpawns = level.getGhostsSpawnPoints();
+	unsigned int seedForSmallGhost = randomizeSeedForSmallGhost();
+
+	for (const auto& spawn : ghostSpawns) {
+		
+		char icon = lvl[spawn.second][spawn.first];
+
+		if (icon == SmallGhost::SMALL_GHOST_ICON)
+			ghosts.push_back(std::make_unique<SmallGhost>(spawn.first, spawn.second, isColor, board, seedForSmallGhost));
+		else if (icon == BigGhost::BIG_GHOST_ICON)
+			ghosts.push_back(std::make_unique<BigGhost>(spawn.first, spawn.second, isColor, mario->getMarioXRef(), mario->getMarioYRef(), board));
+	}
+}
+
+void GameManager::initializeDonkeyKong(const Level& level) {
+	if (donkeyKong == nullptr)
+		donkeyKong = new DonkeyKong(level.getDonkeyKongSpawnX(), level.getDonkeyKongSpawnY(), isColor, board);
+}
+
+GameManager::MarioDamageReport GameManager::checkIfMarioHit() const {
 	for (const auto& barrel : barrels) // Barrels
 		if (barrel.isHitMario())
-			return true;
+			return MarioDamageReport{ &barrel, DamageSource::Barrel };
 
 	for (const auto& ghost : ghosts) // Ghosts
 		if (ghost->isHitMario())
-			return true;
+			return MarioDamageReport{ ghost.get(), DamageSource::Ghost };
 
 	if (donkeyKong->isHitMario()) // Donkey Kong
-		return true;
+		return MarioDamageReport{ donkeyKong, DamageSource::DonkeyKong };
 
 	if (mario->amIDead()) // Mario is hit or dead from fall damage
-		return true;
+		return MarioDamageReport{ nullptr, DamageSource::Fall };
 
-	return false;
+	return MarioDamageReport{ nullptr, DamageSource::None };
 }
 
 void GameManager::handleMarioDeath() {
 	// TODO: reset logic after mario death
 	std::cin.clear();
-	fflush(stdin);
 
-	mario->reset();
-	board.reset();
-	ghosts.clear();
-	readGhostsFromBoard(randomizeSeedForSmallGhost());
-	barrels.clear();
-
-	if (mario->marioLifePoints() > 0) {
+	if (mario->marioLifePoints() > 0)
 		mario->decreaseLife();
-	}
+	
 	// TODO: add sound of mario losing life using the Beep method
-	if (mario->marioLifePoints() == 0) {
+	if (mario->marioLifePoints() <= 0) {
 		state = GameState::GameOver;
 		clearScr();
 		/*
@@ -288,6 +314,13 @@ void GameManager::handleMarioDeath() {
 		 std::cout << gameOverScreen;
 		// TODO: add sound of game over using the Beep method
 		 */
+	}
+	else {
+		mario->reset();
+		board.reset();
+		ghosts.clear();
+		readGhosts(board.getLevel());
+		barrels.clear();
 	}
 }
 
