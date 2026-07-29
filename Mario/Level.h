@@ -1,4 +1,7 @@
 #pragma once
+#include <list>
+#include <string>
+#include <vector>
 
 using point = std::pair<int, int>;
 
@@ -18,7 +21,7 @@ public:
 		ghostsSpawnPoints(ghostsSpawns), hammerSpawnPoints(hammerSpawns), extraLifeSpawnPoints(extraLifeSpawns) {} // Constructor
 
 	// Getters
-	std::vector<std::string> getOriginalLevel() const { return level; }
+	const std::vector<std::string>& getOriginalLevel() const { return level; }
 	int getPaulineSpawnX() const { return paulineSpawn.first; }
 	int getPaulineSpawnY() const { return paulineSpawn.second; }
 	int getDonkeyKongSpawnX() const { return donkeyKongSpawn.first; }

@@ -23,7 +23,7 @@ std::list<std::string> ScreenLoader::getScreenFileNames() {
     return FilesFromFolder;
 }
 
-Level ScreenLoader::TryLoadLevel(const string fileName) {
+Level* ScreenLoader::TryLoadLevel(const string fileName) {
 
 	std::ifstream file(fileName);
 
@@ -42,9 +42,9 @@ Level ScreenLoader::TryLoadLevel(const string fileName) {
 	point donkeyKongSpawn(-1, -1);
     point legendPosition(-1, -1);
 
-    std::list<point>& ghostsSpawns;
-    std::list<point>& hammerSpawns;
-    std::list<point>& extraLifeSpawns;
+    std::list<point> ghostsSpawns;
+    std::list<point> hammerSpawns;
+    std::list<point> extraLifeSpawns;
     std::string line;
     size_t row = 0;
 
@@ -125,5 +125,5 @@ Level ScreenLoader::TryLoadLevel(const string fileName) {
         throw std::invalid_argument(errorString);
     }
 
-	return Level(fileName, lvl, marioSpawn, donkeyKongSpawn, paulineSpawn, legendPosition, ghostsSpawns, hammerSpawns, extraLifeSpawns);
+	return new Level(fileName, lvl, marioSpawn, donkeyKongSpawn, paulineSpawn, legendPosition, ghostsSpawns, hammerSpawns, extraLifeSpawns);
 }

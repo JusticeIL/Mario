@@ -59,6 +59,8 @@ public:
 	static constexpr char MARIO_HAMMER_ICON = 'M';
 	static constexpr char HAMMER_ICON = 'P';
 
+	int& getMarioXRef() { return x; }
+	int& getMarioYRef() { return y; }
 	int getMarioX() const { return x; }
 	int getMarioY() const { return y; }
 

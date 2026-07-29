@@ -216,17 +216,16 @@ void Mario::jump() {
 
 		if (board.isWithinBounds(nextPosX, nextPosY)) {
 			char nextCh = board.getBoardChar(nextPosX, nextPosY);
-			if (nextCh == Board::EMPTY || nextCh == Board::LADDER) { // The condition might be redundant
+
+			if (nextCh == Board::EMPTY || nextCh == Board::LADDER ||
+				nextCh == Hammer::HAMMER_ICON || nextCh == Pauline::PAULINE_ICON) {
 				x = nextPosX;
 				y = nextPosY;
 				++jumpCounter;
 			}
-			else if (Tiles::isTile(nextCh) || nextCh == Board::WALL) // Case: Mario bump his head against the ceiling
-			{	// TODO: This if might be redundant
-				currDirY = 0;
-				jumpCounter = MAX_JUMP_HEIGHT; // Stop jumping
-			}
-			else {
+			else if (Tiles::isTile(nextCh) || nextCh == Board::WALL || nextCh == Barrel::BARREL_ICON ||
+				nextCh == SmallGhost::SMALL_GHOST_ICON || nextCh == BigGhost::BIG_GHOST_ICON ||	nextCh == DonkeyKong::DONKEY_KONG_ICON) {
+				jumping = false;
 				jumpCounter = MAX_JUMP_HEIGHT;
 			}
 		}
@@ -238,12 +237,14 @@ void Mario::jump() {
 }
 
 void Mario::useHammer() {
+
+	if (hammer == nullptr)
+		return;
+
 	hammer->use(x, y, currDirX, currDirY, &hammerUsed);
-
-	if (hammerUsed) {
+	if (hammerUsed) 
 		pressedkey = Key::Init; // Reset pressed key after using the hammer
-	}
-
+	
 	hammerUsed = false;
 }
 

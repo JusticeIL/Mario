@@ -4,12 +4,13 @@
 #include "Mario.h"
 #include "SmallGhost.h"
 #include "Tiles.h"
+#include "Hammer.h"
 
 bool Enemy::isValidToMove() {
 	int nextPosX = x + currDirX;
 	int nextPosY = y + currDirY;
 
-	if (board.isWithinBounds(nextPosX, nextPosY))
+	if (!board.isWithinBounds(nextPosX, nextPosY))
 		return false;
 
 	char nextCh = board.getBoardChar(nextPosX, nextPosY);

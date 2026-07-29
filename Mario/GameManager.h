@@ -37,7 +37,7 @@ class GameManager {
     DonkeyKong* donkeyKong;
     std::list<Barrel> barrels;
     std::vector<std::unique_ptr<Ghost>> ghosts;
-    std::list<Level> levels;
+    std::list<Level*> levels;
 
     // Game State Management
     enum class GameState { Standby, Playing, Pause, GameOver, Instructions, Options, Exit, GameWon };
@@ -45,6 +45,14 @@ class GameManager {
     enum class Difficulty { Easy, Hard };
     Difficulty difficultyLevel = Difficulty::Easy;
     std::unordered_map<std::string, std::string> error_log;
+
+	// Mario Damage Management
+    enum class DamageSource { None, Barrel, Ghost, DonkeyKong, Fall };
+
+    struct MarioDamageReport {
+        const Enemy* sourceEntity = nullptr; // nullptr for Fall or None
+        DamageSource source = DamageSource::None;
+    };
 
 	// Game screens
     std::string gameOverScreen =
@@ -124,12 +132,23 @@ class GameManager {
     unsigned int randomizeSeedForSmallGhost();
     void resetEnemies();
     bool checkWinCondition() { return pauline->checkWinCondition(); }
-    void updateBarrels();
-    void updateGhosts();
-    void donkeyKongThrowsNewBarrel() { barrels.push_back(*donkeyKong->createBarrel()); }
-    bool checkIfMarioHit();
+
+	// Mario life and death handling
+    MarioDamageReport checkIfMarioHit() const;
     void resetGameAfterMarioDeath();
     void handleMarioDeath();
+ 
+	// Donkey kong management
+    void initializeDonkeyKong(const Level& level);
+    void donkeyKongThrowsNewBarrel() { barrels.push_back(*donkeyKong->createBarrel()); }
+
+    // Barrels management
+    void updateBarrels();
+    void resetBarrels();
+
+    // Ghosts management
+    void readGhosts(const Level& level);
+    void updateGhosts();
 
 public:
 
@@ -143,6 +162,14 @@ public:
     	paused = false;
 		isColor = false;
         ticks = 0;
+    }
+
+    ~GameManager() {
+		// Cleaning the levels list before exiting the game to avoid memory leaks
+        for (auto levelIterator = levels.begin(); levelIterator != levels.end(); ) {
+            delete *levelIterator;                          // 1. Free the allocated memory
+            levelIterator = levels.erase(levelIterator); // 2. Remove pointer from list and get next iterator
+        }
     }
 
     // Constants
@@ -167,10 +194,4 @@ public:
     void terminatePause() { clearScr(); firstPrint = true; }
     void printPauseScreen() const { std::cout << pauseScreen; }
     void loadAllScreens();
-
-    // Barrels management
-    void resetBarrels();
-
-    // Ghosts management
-    void readGhostsFromBoard(unsigned int seed);
 };
