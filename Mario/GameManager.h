@@ -4,194 +4,115 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-
-#include "DonkeyKong.h"
+#include <memory>
+#include "Barrel.h"
 #include "Ghost.h"
-#include "HelperFunc.h"
-#include "Menu.h"
+#include "Hammer.h"
 #include "Level.h"
-#include "Mario.h"
-#include "Pauline.h"
 #include "ScreenLoader.h"
 
 // Forward declarations
 class Board;
-class Barrel;
+class DonkeyKong;
+class Mario;
+class Pauline;
+
+enum class Difficulty { Easy, Hard };
 
 class GameManager {
 
     // Data Members
-    char choiceHolder;
     bool firstPrint;
     bool gameStart;
     bool paused;
-    bool isColor;
+    bool& isColor;
     int ticks;
 
     // References to game objects
-    Menu& menu;
     ScreenLoader screenLoader;
     Board& board;
     Mario* mario;
     Pauline* pauline;
     DonkeyKong* donkeyKong;
+    Hammer* uncollectedHammer;
     std::list<Barrel> barrels;
     std::vector<std::unique_ptr<Ghost>> ghosts;
     std::list<Level*> levels;
+    std::list<Level*>::iterator currentLevel;
 
-    // Game State Management
-    enum class GameState { Standby, Playing, Pause, GameOver, Instructions, Options, Exit, GameWon };
-    GameState state = GameState::Standby;
-    enum class Difficulty { Easy, Hard };
-    Difficulty difficultyLevel = Difficulty::Easy;
-    std::unordered_map<std::string, std::string> error_log;
-
-	// Mario Damage Management
+    // Mario Damage Management
     enum class DamageSource { None, Barrel, Ghost, DonkeyKong, Fall };
-
     struct MarioDamageReport {
         const Enemy* sourceEntity = nullptr; // nullptr for Fall or None
         DamageSource source = DamageSource::None;
     };
 
-	// Game screens
-    std::string gameOverScreen =
-        "Q=============================================================================Q\n"
-        "Q                                                                             Q\n"
-        "Q          GGGGG  AAAAA  M     M  EEEEE    OOO   V   V  EEEEE  RRRR           Q\n"
-        "Q         G       A   A  MM   MM  E       O   O  V   V  E      R   R          Q\n"
-        "Q         G  GG   AAAAA  M M M M  EEEE    O   O  V   V  EEEE   RRRR           Q\n"
-        "Q         G   G   A   A  M  M  M  E       O   O   V V   E      R  R           Q\n"
-        "Q          GGGG   A   A  M     M  EEEEE    OOO     V    EEEEE  R   R          Q\n"
-        "Q                                                                             Q\n"
-        "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ\n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                   Game Over!                                  \n"
-        "                              Returning To main menu                           ";
-
-
-    std::string pauseScreen =
-        "Q==============================================================================Q\n"
-        "Q                                                                              Q\n"
-        "Q                   PPPPP   AAAAA  U   U  SSSSS  EEEEE  DDDD                   Q\n"
-        "Q                   P   P  A     A U   U  S      E      D   D                  Q\n"
-        "Q                   PPPPP  AAAAAAA U   U  SSSSS  EEEE   D   D                  Q\n"
-        "Q                   P      A     A U   U      S  E      D   D                  Q\n"
-        "Q                   P      A     A UUUUU  SSSSS  EEEEE  DDDD                   Q\n"
-        "Q                                                                              Q\n"
-        "Q                                                                              Q\n"
-        "Q                                                                              Q\n"
-        "Q                                                                              Q\n"
-        "Q                                                                              Q\n"
-        "Q                                                                              Q\n"
-        "Q                                                                              Q\n"
-        "Q                                                                              Q\n"
-        "Q                                 _________                                    Q\n"
-        "Q                                 |       |                                    Q\n"
-        "Q                                 |  ESC  |                                    Q\n"
-        "Q                                 |       |                                    Q\n"
-        "Q                                 |_______|                                    Q\n"
-        "Q                                                                              Q\n"
-        "Q                       Press ESC to return to the game                        Q\n"
-        "Q                                                                              Q\n"
-        "Q                                                                              Q\n"
-        "Q==============================================================================Q";
-
-    std::string gameWonScreen =
-        "Q=============================================================================Q\n"
-        "Q                                                                             Q\n"
-        "Q          Y   Y   OOOOO  U   U       !!!      WWW     WWW   OOOOO   N   N    Q\n"
-        "Q           Y Y    O   O  U   U       !!!       W       W    O   O   NN  N    Q\n"
-        "Q            Y     O   O  U   U       !!!       W   W   W    O   O   N N N    Q\n"
-        "Q            Y     O   O  U   U                 W  W W  W    O   O   N  NN    Q\n"
-        "Q            Y     OOOOO   UUU        !!!        W     W     OOOOO   N   N    Q\n"
-        "Q                                                                             Q\n"
-        "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ\n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                Congratulations!                               \n"
-        "                              ON TO THE NEXT STAGE!                              ";
-
-    unsigned int randomizeSeedForSmallGhost();
+    // Game State Management
+    const Difficulty& difficultyLevel;
+    std::unordered_map<std::string, std::string> error_log;
+    
+    // Enemies
     void resetEnemies();
-    bool checkWinCondition() { return pauline->checkWinCondition(); }
+
+    // Game state
+    bool checkWinCondition() const;
 
 	// Mario life and death handling
+    void initializeMario(const Level& level);
     MarioDamageReport checkIfMarioHit() const;
-    void resetGameAfterMarioDeath();
     void handleMarioDeath();
  
 	// Donkey kong management
     void initializeDonkeyKong(const Level& level);
-    void donkeyKongThrowsNewBarrel() { barrels.push_back(*donkeyKong->createBarrel()); }
+    void donkeyKongThrowsNewBarrel();
+
+	// Pauline management
+    void initializePauline(const Level& level);
 
     // Barrels management
     void updateBarrels();
-    void resetBarrels();
 
     // Ghosts management
+    unsigned int randomizeSeedForSmallGhost();
     void readGhosts(const Level& level);
     void updateGhosts();
 
-public:
+    // Hammer management
+    void initializeHammer(const Level& level);
 
-    GameManager(Menu& M, Board& B) : menu(M), board(B) { // Constructor
+    // Memory management
+    void clearAllEntities();
+
+public:
+    GameManager(Board& B, const Difficulty& difficulty, bool& isColor) : board(B), difficultyLevel(difficulty), isColor(isColor) { // Constructor
         mario = nullptr;
-		pauline = nullptr;
+        pauline = nullptr;
         donkeyKong = nullptr;
-        choiceHolder = '\0';
+        uncollectedHammer = nullptr;
         firstPrint = false;
         gameStart = false;
-    	paused = false;
-		isColor = false;
+        paused = false;
         ticks = 0;
     }
 
-    ~GameManager() {
-		// Cleaning the levels list before exiting the game to avoid memory leaks
-        for (auto levelIterator = levels.begin(); levelIterator != levels.end(); ) {
-            delete *levelIterator;                          // 1. Free the allocated memory
-            levelIterator = levels.erase(levelIterator); // 2. Remove pointer from list and get next iterator
-        }
-    }
+	~GameManager(); // Destructor
 
     // Constants
     static constexpr int MAX_X = 80;
     static constexpr int MAX_Y = 25;
     static constexpr int MIN_X = 0;
     static constexpr int MIN_Y = 0;
-    static constexpr char PLAY = '1';
-    static constexpr char OPTIONS = '2';
-    static constexpr char INSTRUCTIONS = '3';
-    static constexpr char ESC = 27;
-    static constexpr char QUIT = 27;
 
     // Game Flow & State Management
-    void run();
-    void playGame();
-    void printScreens();
-    void handleState();
-    void gameOverLogic();
-    void gameWonLogic();
-    void gameReset();
-    void terminatePause() { clearScr(); firstPrint = true; }
-    void printPauseScreen() const { std::cout << pauseScreen; }
+    void setupNewLevel();
+    void startNewGame();
+    enum class GameResult { InProgress, Won, Lost, Paused, QuitToMenu };
+    GameResult playGame();
     void loadAllScreens();
+
+    // Error handling
+    const std::unordered_map<std::string, std::string>& getErrorLog() const { return error_log; }
+    
+    // Setter
+    void setColor(bool color) { isColor = color; }
 };

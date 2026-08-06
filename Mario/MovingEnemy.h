@@ -3,11 +3,10 @@
 
 class MovingEnemy : public Enemy {
 
-	void updateIfDead(int hammerX, int hammerY);
-
 public:
-	MovingEnemy(int x, int y, char symbol, bool& isColor, Board& b) : Enemy(x, y, symbol, isColor, b) {}
+	MovingEnemy(int x, int y, char symbol, Board& b, bool& isColor) : Enemy(x, y, symbol, b, isColor) {}
 
 	void executeMove(bool canMove);
 	virtual void move() = 0;
+	void killed() { isDead = true; }
 };

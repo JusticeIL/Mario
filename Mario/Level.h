@@ -13,20 +13,25 @@ class Level {
 	const point donkeyKongSpawn;
 	const point legendPosition;
 	const std::list<point> ghostsSpawnPoints;
-	const std::list<point> hammerSpawnPoints;
+	const point hammerSpawnPoint;
 	const std::list<point> extraLifeSpawnPoints;
 public:
-	Level(std::string filename, const std::vector<std::string>& lvl, const point &marioSpawn, const point &DKSpawn, const point &paulineSpawn, const point &legendPosition, const std::list<point>& ghostsSpawns, const std::list<point>& hammerSpawns, const std::list<point>& extraLifeSpawns) :
+	Level(std::string filename, const std::vector<std::string>& lvl, const point &marioSpawn, const point &DKSpawn, const point &paulineSpawn, const point &legendPosition, const std::list<point>& ghostsSpawns, const point &hammerSpawn, const std::list<point>& extraLifeSpawns) :
 		filename(filename), level(lvl), marioSpawn(marioSpawn), paulineSpawn(paulineSpawn), donkeyKongSpawn(DKSpawn), legendPosition(legendPosition),
-		ghostsSpawnPoints(ghostsSpawns), hammerSpawnPoints(hammerSpawns), extraLifeSpawnPoints(extraLifeSpawns) {} // Constructor
+		ghostsSpawnPoints(ghostsSpawns), hammerSpawnPoint(hammerSpawn), extraLifeSpawnPoints(extraLifeSpawns) {} // Constructor
 
 	// Getters
 	const std::vector<std::string>& getOriginalLevel() const { return level; }
+	int getMarioSpawnX() const { return marioSpawn.first; }
+	int getMarioSpawnY() const { return marioSpawn.second; }
 	int getPaulineSpawnX() const { return paulineSpawn.first; }
 	int getPaulineSpawnY() const { return paulineSpawn.second; }
 	int getDonkeyKongSpawnX() const { return donkeyKongSpawn.first; }
 	int getDonkeyKongSpawnY() const { return donkeyKongSpawn.second; }
+	int getHammerSpawnX() const { return hammerSpawnPoint.first; }
+	int getHammerSpawnY() const { return hammerSpawnPoint.second; }
+	int getLegendPositionX() const { return legendPosition.first; }
+	int getLegendPositionY() const { return legendPosition.second; }
 	const std::list<std::pair<int, int>>& getGhostsSpawnPoints() const { return ghostsSpawnPoints; }
-	const std::list<std::pair<int, int>>& getHammerSpawnPoints() const { return hammerSpawnPoints; }
 	const std::list<std::pair<int, int>>& getExtraLifeSpawnPoints() const { return extraLifeSpawnPoints; }
 };

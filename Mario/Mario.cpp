@@ -9,7 +9,8 @@
 #include "DonkeyKong.h"
 
 void Mario::setPressedKey(char key) {
-	key = tolower(key);
+	canJump = true;
+
 	switch (static_cast<Key>(key)) {
 	case Key::Up:
 		pressedkey = Key::Up;
@@ -26,32 +27,123 @@ void Mario::setPressedKey(char key) {
 	case Key::Stay:
 		pressedkey = Key::Stay;
 		break;
+	case Key::PlayHammer:
+		pressedkey = Key::PlayHammer;
+		break;
 	default:
 		pressedkey = Key::Stay;
 		break;
 	}
 }
 
+void Mario::tryMove() {
+
+	if (falling)
+		currDirY = 1;
+	else if (jumping)
+		currDirY = -1;
+	else
+		currDirY = 0;
+
+	if (hasHammer() && hammer->isSwinging()) {
+		currDirX = 0;
+		pressedkey = Key::Stay; // Prevents Mario from storing the key and walking after the swing finishes
+		return;
+	}
+
+	if (pressedkey == Key::Left) {
+		currDirX = -1;
+		if (!falling && !jumping)
+			currDirY = 0;
+	}
+	else if (pressedkey == Key::Right) {
+		currDirX = 1;
+		if (!falling && !jumping)
+			currDirY = 0;
+	}
+	else if (pressedkey == Key::Up) {
+		currDirX = 0;
+		if (!falling && !jumping)
+			currDirY = -1;
+	}
+		
+	else if (pressedkey == Key::Down) {
+		currDirX = 0;
+		if (!falling && !jumping)
+			currDirY = 1;
+	}
+		
+	else if (pressedkey == Key::Stay) {
+		currDirX = 0;
+		if (!falling && !jumping)
+			currDirY = 0;
+	}
+
+	else { // Case: user can control Y-axis if they are safely on a ladder or ground
+		if (pressedkey == Key::Up)
+			currDirY = -1;
+		else if (pressedkey == Key::Down)
+			currDirY = 1;
+		else if (pressedkey == Key::Stay)
+			currDirY = 0;
+	}
+}
+
 void Mario::updateState() {
 	char chBelow = board.getBoardChar(x, y + 1);
 	char chAbove = board.getBoardChar(x, y - 1);
-	char nextCh = board.getBoardChar(x + currDirX, y + currDirY);
+	bool wasOnLadder = onLadder;
 
-	if (!isOnGround && jumping && jumpCounter < MAX_JUMP_HEIGHT) { // Case: continue jumping
-		falling = false;
-	}
-	else if (!isOnGround && jumping && jumpCounter >= MAX_JUMP_HEIGHT) {
-		jumping = false;
-		falling = true;
-	}
-	else if (chBelow == Board::EMPTY) { // Case: Mario is falling or jumping
+	// 1. Update environment & gravity
+	if (chBelow == Board::EMPTY) { // Case: Mario is falling or jumping
 		isOnGround = false;
 		onLadder = false;
+		if (!jumping) 
+			falling = true;
 	}
 	else if (Tiles::isTile(chBelow) && prevCh != Board::LADDER) { // Case: Mario is on the ground
 		isOnGround = true;
 		onLadder = false;
 		falling = false;
+		jumpCounter = 0;
+	}
+	else if (chBelow == Board::LADDER) { // Case: Mario is on the ladder
+		isOnGround = false;
+		onLadder = true;
+		falling = false;
+	}
+	else if (chAbove == Board::LADDER) 
+		falling = false;
+
+	// 2. Ladder dismount intercept
+	if (wasOnLadder && isOnGround && !onLadder) {
+		if (pressedkey == Key::Up) 
+			pressedkey = Key::Stay;
+
+		canJump = false;
+	}
+
+	// 3. Update ongoing jump
+	if (jumping && (jumpCounter >= MAX_JUMP_HEIGHT || Tiles::isTile(chAbove) || chAbove == Board::WALL)) {
+		jumping = false;
+		falling = true;
+		jumpCounter = 0;
+	}
+
+	// 4. Handle new inputs
+	if (isOnGround && pressedkey == Key::Up && !jumping && canJump && prevCh != Board::LADDER) { // Case: start jumping
+		onLadder = false;
+		falling = false;
+		jumping = true;
+
+		if (currDirX == -1)
+			pressedkey = Key::Left;
+		else if (currDirX == 1)
+			pressedkey = Key::Right;
+		else
+			pressedkey = Key::Stay;
+
+		canJump = false; // Consumes the jump without erasing Mario X-axis movement
 	}
 	else if (prevCh == Board::LADDER && isOnGround && pressedkey == Key::Up) { // Case: climbing a ladder from a floor
 		onLadder = true;
@@ -65,66 +157,44 @@ void Mario::updateState() {
 		jumping = false;
 		onLadder = true;
 	}
-	else if (chBelow == Board::LADDER || chAbove == Board::LADDER) { // Case: Mario is on the ladder
-		isOnGround = false;
-		onLadder = true;
-		falling = false;
-	}
-	else if (isOnGround && pressedkey == Key::Up && !jumping && prevCh != Board::LADDER) { // Case: start jumping
-		onLadder = false;
-		falling = false;
-		jumping = true;
-	}
-
-	if (prevCh == Hammer::HAMMER_ICON) {
-		withHammer = true;
-	}
-
 }
 
 bool Mario::isValidToMove() {
-	updateState();
-
 	int nextPosX = x + currDirX; // Direction in x axis
 	int nextPosY = y + currDirY; // Direction in y axis
 
-	if (!board.isWithinBounds(nextPosX, nextPosY)) {
+	if (!board.isWithinBounds(nextPosX, nextPosY)) 
 		return false;
-	}
 
-	char nextCh = board.getBoardChar(nextPosX, nextPosY); //Update next char
-	char chBelow = board.getBoardChar(x, y + 1); //Update char below
+	char nextCh = board.getBoardChar(nextPosX, nextPosY); // Update next char
 
 	// Handle movement based on the next char
 
 	if (Tiles::isTile(nextCh)) { // Tiles
-		if (onLadder && pressedkey == Key::Up) {
+		if (onLadder && pressedkey == Key::Up)
 			return true;
-		}
-		else if (isOnGround && pressedkey == Key::Down && board.getBoardChar(x, y + 2) == Board::LADDER) { // Case: go down the ladder through a wall
+		if (isOnGround && pressedkey == Key::Down && board.isWithinBounds(x, y + 2) && board.getBoardChar(x, y + 2) == Board::LADDER) // Case: go down the ladder through a wall
 			return true;
-		}
-		else { // Case: Mario cannot walk into tiles
-			return false;
-		}
+		
+		return false; // Case: Mario cannot walk into tiles
 	}
 
 	switch (nextCh) {
 	case Board::EMPTY: // Empty space
-		if (isOnGround || onLadder) { // Case: Mario can move to empty space if on the ground or if on ladder
+		if (jumping || falling) // Mario is in an uncontrollable y axis state
 			return true;
-		}
-		else { // Case: Mario can't move if not on the ground or on the ladder
-			return false;
-		}
+		if (isOnGround && currDirY == 0) // Case: Mario can move to empty space if on the ground
+			return true;
+		if (onLadder) // Case: Mario can move to empty space if on ladder
+			return true;
+		return false;
 	case Board::LADDER:
 		return true;
 	case Board::WALL:
 		return false; // Mario can't move through walls
 	case Barrel::BARREL_ICON:
 		return true;
-	case Pauline::PAULINE_ICON: 
-		winCon = true;
+	case Pauline::PAULINE_ICON:
 		return true;
 	case Hammer::HAMMER_ICON:
 		return true;
@@ -140,36 +210,53 @@ bool Mario::isValidToMove() {
 }
 
 void Mario::move() {
+	if (hasHammer() && pressedkey == Key::PlayHammer)
+		useHammer();
+
+	calculatePrevPos();
 	eraseFromBoard();
 	eraseFromConsole();
 
-	bool canMove = isValidToMove();
-	
-	if (canMove) {
-		int nextPosX = x + currDirX; // Direction in x axis
-		int nextPosY = y + currDirY; // Direction in y axis
-		char nextCh = board.getBoardChar(nextPosX, nextPosY);
-		if (jumping) {
-			jump();
-		}
-		else if (isOnGround && fallCounter >= MAX_FALL_COUNTER) {
-			isDead = true;
-			resetDir();
-		}
-		else if (falling) {
-			fall();
-		}
-		else { // Case: Mario can walk normally
-			x = nextPosX;
-			y = nextPosY;
-		}
-	}
-	else { // Mario cannot move
+	updateState();
+	tryMove();
+
+	if (isOnGround && fallCounter >= MAX_FALL_COUNTER) {
+		isDead = true;
 		resetDir();
+	}
+	else if (isOnGround || onLadder) // Case: Survived the landing, clear the damage
+		fallCounter = 0;
+
+	if (!isDead) {
+		bool canMove = isValidToMove();
+
+		if (!canMove && falling && currDirX != 0) { // Diagonal Wall Collision Fallback
+			currDirX = 0;
+			canMove = isValidToMove();
+		}
+
+		if (canMove) {
+			int nextPosX = x + currDirX; // Direction in x axis
+			int nextPosY = y + currDirY; // Direction in y axis
+
+			if (jumping)
+				jump();
+			else if (falling)
+				fall();
+			else { // Case: Mario can walk normally or climb
+				x = nextPosX;
+				y = nextPosY;
+			}
+		}
+		else // Mario cannot move
+			resetDir();
 	}
 
 	drawToBoard();
 	drawToConsole();
+
+	if (hasHammer())
+		hammer->updateState();
 }
 
 void Mario::fall() {
@@ -191,26 +278,23 @@ void Mario::fall() {
 			isOnGround = true;
 			currDirY = 0;
 			fallCounter = 0;
-			return;
+			jumpCounter = 0;
 		}
 		else {
 			resetDir();
 			fallCounter = 0;
-			return;
 		}
 	}
-	else { // Case: hitting the buttom of the board
+	else { // Case: hitting the bottom of the board
 		isOnGround = true;
 		currDirY = 0;
 	}
 }
 
 void Mario::jump() {
-
 	currDirY = -1;
 
-	if (jumpCounter < MAX_JUMP_HEIGHT)
-	{
+	if (jumpCounter < MAX_JUMP_HEIGHT) {
 		int nextPosX = x + currDirX;
 		int nextPosY = y + currDirY;
 
@@ -223,10 +307,12 @@ void Mario::jump() {
 				y = nextPosY;
 				++jumpCounter;
 			}
+
 			else if (Tiles::isTile(nextCh) || nextCh == Board::WALL || nextCh == Barrel::BARREL_ICON ||
-				nextCh == SmallGhost::SMALL_GHOST_ICON || nextCh == BigGhost::BIG_GHOST_ICON ||	nextCh == DonkeyKong::DONKEY_KONG_ICON) {
+				nextCh == SmallGhost::SMALL_GHOST_ICON || nextCh == BigGhost::BIG_GHOST_ICON || nextCh == DonkeyKong::DONKEY_KONG_ICON) {
 				jumping = false;
-				jumpCounter = MAX_JUMP_HEIGHT;
+				falling = true;
+				jumpCounter = 0;
 			}
 		}
 		else {
@@ -237,20 +323,13 @@ void Mario::jump() {
 }
 
 void Mario::useHammer() {
-
 	if (hammer == nullptr)
 		return;
 
-	hammer->use(x, y, currDirX, currDirY, &hammerUsed);
-	if (hammerUsed) 
+	bool swingStarted = false; // Local variable instead of a class member
+	hammer->use(x, y, currDirX, &swingStarted);
+	if (swingStarted)
 		pressedkey = Key::Init; // Reset pressed key after using the hammer
-	
-	hammerUsed = false;
-}
-
-void Mario::resetHammer() {
-	hammer->reset();
-	withHammer = false;
 }
 
 void Mario::reset() {
@@ -264,9 +343,9 @@ void Mario::reset() {
 	pressedkey = Key::Init;
 
 	// Hammer state
-	withHammer = false;
-	hammerUsed = false;
-	hammer->reset();
+	delete hammer;
+	hammer = nullptr;
+	icon = MARIO_ICON;
 
 	// Jump / fall / ladder state
 	jumpCounter = 0;
@@ -278,4 +357,27 @@ void Mario::reset() {
 
 	// Game state
 	isDead = false;
+}
+
+void Mario::tryPickUpHammer(Hammer*& uncollectedHammer) {
+	if (uncollectedHammer != nullptr) {
+		if (uncollectedHammer->getX() == x && uncollectedHammer->getY() == y) {
+			if (!hasHammer()) {
+				pickUpHammer(uncollectedHammer);
+				uncollectedHammer = nullptr; // Remove the hammer from the board
+			}
+			else {
+				delete uncollectedHammer;
+				uncollectedHammer = nullptr;
+				prevCh = Board::EMPTY; // Clear Mario's footprint so he doesn't leave a ghost hammer behind
+			}
+		}
+	}
+}
+
+void Mario::pickUpHammer(Hammer* h) {
+	hammer = h;
+	hammer->setCollected();
+	icon = MARIO_HAMMER_ICON;
+	prevCh = Board::EMPTY;
 }

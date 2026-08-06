@@ -32,14 +32,11 @@ class Mario : public Character {
 	// Life
 	unsigned int life;
 
-	// Hammer handling
-	bool withHammer;
-	bool hammerUsed;
-
 	// Jumping & Falling
 	unsigned int jumpCounter;
 	unsigned int fallCounter;
 	bool isOnGround;
+	bool canJump;
 	bool jumping;
 	bool onLadder;
 	bool falling;
@@ -48,12 +45,15 @@ class Mario : public Character {
 	Hammer* hammer;
 
 public:
-	Mario(int x, int y, Board& b, bool& isColor) : Character(x, y, MARIO_ICON, isColor, b),
-		prevPosX(0), prevPosY(0), startPosX(x), startPosY(y), pressedkey(Key::Stay),
+	Mario(int x, int y, Board& b, bool& isColor) : Character(x, y, MARIO_ICON, b, isColor),
+		startPosX(x), startPosY(y), pressedkey(Key::Stay),
 		life(3),
-		withHammer(false), hammerUsed(false),
-		jumpCounter(0), fallCounter(0), isOnGround(true), jumping(false), onLadder(false), falling(false),
-		hammer(nullptr)	{}
+		jumpCounter(0), fallCounter(0), isOnGround(true), canJump(true), jumping(false), onLadder(false), falling(false),
+		hammer(nullptr)	{
+		prevPosX = x;
+		prevPosY = y;
+		hammer = nullptr;
+	}
 
 	static constexpr char MARIO_ICON = '@';
 	static constexpr char MARIO_HAMMER_ICON = 'M';
@@ -68,8 +68,9 @@ public:
 
 	void setPressedKey(char ch);
 	void updateState();
-	bool isValidToMove() override;
+	bool isValidToMove();
 	void resetDir() { currDirX = 0;	currDirY = 0; }
+	void tryMove();
 	void move();
 	void reset();
 
@@ -80,9 +81,13 @@ public:
 	// Life management
 	unsigned int marioLifePoints() const { return life; }
 	void decreaseLife() { --life; }
+	void restoreLives() { life = 3; }
 
 	// Hammer management
-	void pickUpHammer(Hammer* h) { hammer = h; withHammer = true; hammer->setCollected(); icon = MARIO_HAMMER_ICON; }
+	void tryPickUpHammer(Hammer*& uncollectedHammer);
+	void pickUpHammer(Hammer* h);
 	void useHammer();
-	void resetHammer();
+	void resetHammer() const { hammer->reset(); }
+	bool hasHammer() const { return hammer != nullptr; }
+	Hammer* getHammer() const { return hammer; }
 };

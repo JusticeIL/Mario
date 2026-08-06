@@ -7,5 +7,5 @@ class Board;
 class Ghost : public MovingEnemy {
 
 public:
-	Ghost(int x, int y, char symbol, bool& isColor, Board& b) : MovingEnemy(x, y, symbol, isColor, b) {}
+	Ghost(int x, int y, char symbol, Board& b, bool& isColor) : MovingEnemy(x, y, symbol, b, isColor) {}
 };

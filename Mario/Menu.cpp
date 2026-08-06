@@ -1,17 +1,194 @@
 #include <iostream>
 #include <windows.h>
 #include <conio.h>
+#include <vector>
 #include "Menu.h"
+#include "Colors.h"
 
-// This function prints the menu
-void Menu::printMainMenu() const {
+// This function manages the main game loop, handles transitions between different game states, and coordinates user inputs and game actions
+void Menu::run() {
 
-    gotoxy(0, 0);
+	gameManager.loadAllScreens(); // TODO: have the game to handle errors through the error log screen
 
-    for (int i = 0; i < std::size(mainMenu) - 1; i++) 
-        std::cout << mainMenu[i] << '\n';
-    
-    std::cout << mainMenu[std::size(mainMenu) - 1];
+	while (state != GameState::Exit) { // main menu loop runs as long as ESC key wasn't pressed
+		if (state == GameState::MainMenu) {
+			printMainMenu();
+			menuChar = handleMenu();
+			switch (menuChar) {
+			case PLAY_CH: // Start game
+				gameReset();
+				state = GameState::Playing;
+				menuChar = '\0';
+				ResetMenu();
+				resetAllArrows();
+				firstPrint = true;
+				break;
+			case INSTRUCTIONS_CH: // Instructions
+				state = GameState::Instructions;
+				menuChar = '\0';
+				ResetMenu();
+				resetAllArrows();
+				firstPrint = true;
+				break;
+			case OPTIONS_CH: // Options
+				state = GameState::Options;
+				menuChar = '\0';
+				ResetMenu();
+				resetAllArrows();
+				firstPrint = true;
+				break;
+			case EXIT_CH: // Exit
+				clearScr();
+				state = GameState::Exit;
+				break;
+			}
+		}
+		else if (state == GameState::Playing) {
+			GameManager::GameResult result = gameManager.playGame();
+			if (result == GameManager::GameResult::Paused)
+				state = GameState::Pause;
+			else if (result == GameManager::GameResult::Lost)
+				state = GameState::GameOver;
+			else if (result == GameManager::GameResult::Won)
+				state = GameState::GameWon;
+		}
+		else if (state == GameState::Pause) {
+			printPauseScreen();
+			if (_kbhit()) {
+				char pressedKey = _getch();
+				if (pressedKey == ESC_CH) { // Unpause only after ESC
+					clearScr();
+					firstPrint = true;
+					state = GameState::Playing;
+				}
+			}
+		}
+		else if (state == GameState::GameOver)
+			gameOverLogic();
+		else if (state == GameState::GameWon)
+			gameWonLogic();
+		else if (state == GameState::Instructions || state == GameState::Options) { // Case: menu screens
+			printScreens();
+			handleState();
+		}
+	}
+}
+
+void Menu::printScreens() {
+
+	switch (state) {
+	case GameState::Instructions:
+	case GameState::Options:
+		menuChar = '\0';
+		break;
+	}
+
+	if (firstPrint)
+		clearScr();
+	
+	gotoxy(0, 0);
+
+	switch (state)	{
+	case GameState::Instructions:
+		printInstructionsScreen();
+		break;
+
+	case GameState::Options:
+		printOptionsScreen();
+		// Color mode printing
+		gotoxy(COLOR_MODE_POS.x, COLOR_MODE_POS.y);
+		if (isColor)
+			std::cout << "ON ";
+		else
+			std::cout << "OFF";
+
+		// Difficulty printing
+		gotoxy(DIFFICULTY_POS.x, DIFFICULTY_POS.y);
+		if (difficultyLevel == Difficulty::Easy)
+			std::cout << "Easy";
+		else // Case: difficultylevel == HARD
+			std::cout << "Hard";
+		break;
+	}
+
+	firstPrint = false;
+}
+
+// This function processes user inputs and updates the game state accordingly during non-gameplay states
+void Menu::handleState() {
+
+	static DWORD messageTimestamp = 0;
+	static bool messageOnScreen = false;
+
+	while (state == GameState::Instructions || state == GameState::Options) {
+		if (_kbhit()) {
+			char pressedKey = _getch();
+			pressedKey = tolower(pressedKey);
+			menuChar = pressedKey;
+
+			switch (state) {
+			case GameState::Instructions:
+				if (pressedKey == exitCh) { // Case: returning to main menu
+					ResetMenu(); // Resetting menu variables
+					firstPrint = true;
+					clearScr(); // Clear the screen before returning to the menu
+					state = GameState::MainMenu;
+					resetAllArrows();
+				}
+				break;
+			case GameState::Options:
+				if (pressedKey == '5') {
+					isColor = !isColor; // Toggle color mode
+					gameManager.setColor(isColor);
+					gotoxy(COLOR_MODE_POS.x, COLOR_MODE_POS.y);
+					std::cout << (isColor ? "ON " : "OFF");
+					printOKInGreen();
+					messageOnScreen = true;
+					messageTimestamp = GetTickCount();
+				}
+				else if (pressedKey == '6') {
+					state = GameState::ConsoleLog;
+					size_t currentPage = 0;
+					clearScr();
+					gotoxy(0, 0);
+					std::cout << FileErrorLogScreen;
+
+					while (state == GameState::ConsoleLog) {
+						printConsoleLogScreen(currentPage);
+						handleConsoleLogInput(currentPage);
+					}
+
+					firstPrint = true;
+					printScreens();
+				}
+				else if (pressedKey == '7') {
+					difficultyLevel = (difficultyLevel == Difficulty::Easy) ? Difficulty::Hard : Difficulty::Easy; // Toggle difficulty level
+					gotoxy(DIFFICULTY_POS.x, DIFFICULTY_POS.y);
+					std::cout << std::string(10, ' '); // Clear message
+					gotoxy(DIFFICULTY_POS.x, DIFFICULTY_POS.y);
+					std::cout << (difficultyLevel == Difficulty::Easy ? "Easy" : "Hard");
+					printOKInGreen();
+					messageOnScreen = true;
+					messageTimestamp = GetTickCount();
+				}
+				else if (pressedKey == exitCh) {// Case: returning to main menu
+					ResetMenu(); // Resetting menu variables
+					firstPrint = true;
+					clearScr(); // Clear the screen before returning to the menu
+					state = GameState::MainMenu;
+					resetAllArrows();
+				}
+				break;
+			}
+		}
+
+		if (messageOnScreen && GetTickCount() - messageTimestamp >= 2000)
+		{
+			gotoxy(27, 10);
+			std::cout << std::string(30, ' '); // Clear message
+			messageOnScreen = false;
+		}
+	}
 }
 
 // This function handles user input in the menu, updates the selected option, and manages the menu display
@@ -20,17 +197,17 @@ char Menu::handleMenu() {
     while (true) {
         if (_kbhit()) {
             char MenuInput = _getch();
-            if ((GameManager::PLAY <= MenuInput && MenuInput <= GameManager::INSTRUCTIONS) || MenuInput == GameManager::QUIT) {//Available keys
+            if ((PLAY_CH <= MenuInput && MenuInput <= INSTRUCTIONS_CH) || MenuInput == EXIT_CH) {// Available keys
                 resetAllArrows(); // Case: remove any current showing arrows
                 MoveArrow(MenuInput); // Case: Arrow is showing on screen
                 isArrow = true; // Case: Arrow is showing on screen so flag should be true now
                 menuChar = MenuInput; // Menu input is entered
             }
 
-            if ((MenuInput == '\n' || MenuInput == '\r') && isArrow) {// Only after arrow is showing & player pressed ENTER
+            if ((MenuInput == '\n' || MenuInput == '\r') && isArrow) { // Only after arrow is showing & player pressed ENTER
                 chosen = true;
 
-                if (menuChar == GameManager::ESC)
+                if (menuChar == ESC_CH)
                     gotoxy(0, 26);
 
                 clearScr();
@@ -41,21 +218,132 @@ char Menu::handleMenu() {
     }
 }
 
+void Menu::printConsoleLogScreen(size_t currentErrorPage) {
+	// 1. Clean the inner screen (using ' ' to wipe previous messages)
+	std::string blankLine(76, ' ');
+	for (int i = 5; i <= 20; ++i) {
+		gotoxy(2, i);
+		std::cout << blankLine;
+	}
+
+	const auto& errorLog = gameManager.getErrorLog();
+
+	// 2. Handle perfect loads (no errors)
+	if (errorLog.empty()) {
+		const std::string successMsg = "No errors found! All screens loaded successfully.";
+		int startX = (GameManager::MAX_X - successMsg.length()) / 2;
+		gotoxy(startX, 10);
+		std::cout << GREEN << successMsg << RESET;
+	}
+	else {
+		// 3. Convert unordered_map to a vector to index pages
+		std::vector<std::pair<std::string, std::string>> pages(errorLog.begin(), errorLog.end());
+
+		size_t safePage = currentErrorPage;
+
+		if (safePage >= pages.size())
+			safePage = pages.size() - 1;
+
+		const auto& currentPageData = pages[safePage];
+
+		// Print the title at line 5, exactly in the middle.
+		// Assuming the title length is 15 exactly (e.g. "dkong_01.screen")
+		int titleStartX = (GameManager::MAX_X - 15) / 2;
+		gotoxy(titleStartX, 5);
+		std::cout << currentPageData.first;
+
+		// 4. Format the text for the CURRENT page dynamically
+		std::vector<std::string> displayLines;
+		const std::string& errors = currentPageData.second;
+		size_t startPos = 0;
+		size_t newlinePos = errors.find('\n');
+
+		// Slice up to the newline characters
+		while (newlinePos != std::string::npos) {
+			displayLines.push_back(errors.substr(startPos, newlinePos - startPos));
+			startPos = newlinePos + 1;
+			newlinePos = errors.find('\n', startPos);
+		}
+		// Catch the final line
+		if (startPos < errors.length())
+			displayLines.push_back(errors.substr(startPos));
+
+		// 5. Find the absolute longest line to calculate dead-center alignment
+		size_t maxLength = 0;
+		for (const std::string& line : displayLines) {
+			if (line.length() > maxLength)
+				maxLength = line.length();
+		}
+
+		int startX = (GameManager::MAX_X - static_cast<int>(maxLength)) / 2;
+		if (startX < 2) // Case: error string is too long
+			startX = 2;
+
+		// 6. Print the aligned block starting from line 7
+		int currentY = 7;
+		std::cout << RED;
+		for (const std::string& line : displayLines) {
+			if (currentY >= 20) {
+				gotoxy(startX, currentY);
+				std::cout << RESET;
+				std::cout << "... (More errors hidden)";
+				break;
+			}
+			gotoxy(startX, currentY);
+			std::cout << line;
+			currentY++;
+		}
+		std::cout << RESET;
+	}
+}
+
+void Menu::handleConsoleLogInput(size_t& currentErrorPage) {
+	const auto& errorLog = gameManager.getErrorLog();
+	char userChoice = '\0';
+
+	while (userChoice != 'q' && userChoice != 'e' && userChoice != exitCh && userChoice != ESC_CH) {
+		if (_kbhit()) {
+			userChoice = tolower(_getch());
+
+			if (userChoice == 'e') {
+				// Next Page
+				if (!errorLog.empty() && currentErrorPage + 1 < errorLog.size()) 
+					++currentErrorPage;
+				else 
+					userChoice = '\0';
+			}
+			else if (userChoice == 'q') {
+				// Previous Page
+				if (!errorLog.empty() && currentErrorPage > 0) 
+					--currentErrorPage;
+				else 
+					userChoice = '\0';
+			}
+			else if (userChoice == exitCh || userChoice == ESC_CH) 
+				state = GameState::Options;
+			else // Case: Unfamiliar key pressed
+				userChoice = '\0';
+		}
+
+		Sleep(10);
+	}
+}
+
 // This function receives a numeric key (as a character), updates the menu arrow position, and prints it
 void Menu::MoveArrow(char numKey) const {
 
     resetAllArrows(); // Reset all
     switch (numKey) {
-    case GameManager::PLAY:
+    case PLAY_CH:
         gotoxy(PLAY.x, PLAY.y);
         break;
-    case GameManager::OPTIONS:
+    case OPTIONS_CH:
         gotoxy(OPTIONS.x, OPTIONS.y);
         break;
-    case GameManager::INSTRUCTIONS:
+    case INSTRUCTIONS_CH:
         gotoxy(INSTRUCTIONS.x, INSTRUCTIONS.y);
         break;
-    case GameManager::QUIT:
+    case EXIT_CH:
         gotoxy(EXIT.x, EXIT.y);
         break;
     }
@@ -71,21 +359,89 @@ void Menu::resetAllArrows() const {
     }
 }
 
-// This function prints "OK!" in green at the specified screen coordinates with a blinking effect
-void Menu::printOKInGreen(int x, int y) const {
+// This function prints "OK!" in green with a blinking effect
+void Menu::printOKInGreen() const {
+    gotoxy(OK_POS.x, OK_POS.y);
+    std::cout << GREEN << "OK!" << RESET;
+    Sleep(150);
+    gotoxy(OK_POS.x, OK_POS.y);
+    std::cout << GREEN_BG << "OK!" << RESET_BG;
+    Sleep(150);
+    gotoxy(OK_POS.x, OK_POS.y);
+    std::cout << GREEN << "OK!" << RESET;
+    Sleep(150);
+    gotoxy(OK_POS.x, OK_POS.y);
+    std::cout << GREEN_BG << "OK!" << RESET_BG;
+    Sleep(150);
+    gotoxy(OK_POS.x, OK_POS.y);
+    std::cout << GREEN << "OK!" << RESET;
+	Sleep(150);
+	gotoxy(OK_POS.x, OK_POS.y);
+	std::cout << GREEN_BG << "OK!" << RESET_BG;
+	Sleep(150);
+	gotoxy(OK_POS.x, OK_POS.y);
+	std::cout << GREEN << "OK!" << RESET;
+	gotoxy(OK_POS.x, OK_POS.y);
+	std::cout << "   ";
+}
 
-    gotoxy(x, y);
-    std::cout << GREEN << "OK!" << RESET;
-    Sleep(150);
-    gotoxy(x, y);
-    std::cout << GREEN_BG << "OK!" << RESET_BG;
-    Sleep(150);
-    gotoxy(x, y);
-    std::cout << GREEN << "OK!" << RESET;
-    Sleep(150);
-    gotoxy(x, y);
-    std::cout << GREEN_BG << "OK!" << RESET_BG;
-    Sleep(150);
-    gotoxy(x, y);
-    std::cout << GREEN << "OK!" << RESET;
+void Menu::gameOverLogic() {
+	clearScr();
+	printGameOverScreen();
+	// playWinSound();
+	Sleep(1000);
+	gameReset();
+	state = GameState::MainMenu;
+	firstPrint = true;
+	clearScr();
+}
+
+void Menu::gameWonLogic() {
+	clearScr();
+	printGameWonScreen();
+	// playWinSound();
+	Sleep(1000);
+	gameReset();
+	state = GameState::MainMenu;
+	firstPrint = true;
+	clearScr();
+}
+
+void Menu::gameReset() {
+	// Tell the GameManager to prepare a fresh board, enemies, and Mario states
+	gameManager.startNewGame();
+
+	menuChar = '\0';
+	firstPrint = true;
+	resetAllArrows();
+}
+
+// This function plays the melody of "Twinkle Twinkle Little Star" (while game over) using the Beep function
+void Menu::playWinSound() const {
+	// Twinkle Twinkle Little Star
+	Beep(523, 500);  // C5 for 500ms
+	Beep(523, 500);  // C5 for 500ms
+	Beep(784, 500);  // G5 for 500ms
+	Beep(784, 500);  // G5 for 500ms
+	Beep(880, 500);  // A5 for 500ms
+	Beep(880, 500);  // A5 for 500ms
+	Beep(784, 700); // G5 for 1000ms
+
+	Sleep(300);      // Pause
+
+	Beep(659, 500);  // F5 for 500ms
+	Beep(659, 500);  // F5 for 500ms
+	Beep(587, 500);  // D5 for 500ms
+	Beep(587, 500);  // D5 for 500ms
+	Beep(523, 500);  // C5 for 500ms
+	Beep(523, 500);  // C5 for 500ms
+	Beep(587, 500);  // D5 for 500ms
+}
+
+// This function plays a short sound effect for exiting the game using the Beep function
+void Menu::playExitSound() const {
+	Beep(1500, 100);
+	Sleep(50);
+	Beep(1000, 50);
+	Beep(1200, 50);
 }

@@ -9,7 +9,7 @@ class DonkeyKong : public Enemy {
 	BarrelFactory barrelFactory;
 
 public:
-	DonkeyKong(int x, int y, bool& isColor, Board& board) : Enemy(x, y, DONKEY_KONG_ICON, isColor, board),
+	DonkeyKong(int x, int y, Board& board, bool& isColor) : Enemy(x, y, DONKEY_KONG_ICON, board, isColor),
 		barrelFactory(x, y, board, isColor) {
 		currDirX = 0;
 		currDirY = 0;

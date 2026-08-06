@@ -10,4 +10,5 @@ class Tiles {
 public:
 	Tiles(bool& isColor) : isColor(isColor) {}
 	static bool isTile(char ch) { return std::find(tiles.begin(), tiles.end(), ch) != tiles.end(); }
+	static constexpr char OUT_OF_BOUNDS_FALLBACK_FLOOR = tiles[1];
 };

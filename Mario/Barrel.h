@@ -1,4 +1,5 @@
 #pragma once
+#include <cstring>
 #include "MovingEnemy.h"
 
 class Barrel : public MovingEnemy {
@@ -11,12 +12,22 @@ class Barrel : public MovingEnemy {
 	int lastDir_x;
 	char prevChars[3][5];
 
-	Barrel(int x, int y, bool& isColor, Board& b) : MovingEnemy(x, y, BARREL_ICON, isColor, b),
-		fallCounter(0), isOnAir(false), lastDir_x(0)	{
+	// Explosion state
+	enum class ExplosionState {	NotExploding, Radius1, Radius2, RestoreAndDie };
+	ExplosionState explosionState;
+
+	Barrel(int x, int y, Board& b, bool& isColor) : MovingEnemy(x, y, BARREL_ICON, b, isColor),
+		fallCounter(0), isOnAir(false), lastDir_x(0) { // Constructor
 		std::memset(prevChars, '\0', sizeof(prevChars));
+		explosionState = ExplosionState::NotExploding;
 	}
 
+	// Barrel movement
+	void setDirection();
+	void fall();
+
 	// Explosion FX
+	void processExplosion();
 	void savePreviousCharsExplosion();
 	void create_first_radius_exp() const;
 	void delete_first_radius_exp() const;
@@ -30,10 +41,8 @@ public:
 
 	// Barrel movement
 	void move() override;
-	void setDirection();
-	void fall();
 
 	// Barrel explosion handling
-	void explode();
+	void startExplode() { explosionState = ExplosionState::Radius1; }
 	bool isExploded() const { return isDead; }
 };

@@ -1,5 +1,7 @@
 #pragma once
-#include "Board.h"
+
+// Forward declaration
+class Board;
 
 class Asset {
 
@@ -18,8 +20,7 @@ protected:
 	// Board
 	Board& board;
 
-	Asset(int x, int y, char symbol, bool& isColor, Board& b) : prevPosX(-1), x(x), currDirX(0), prevPosY(-1), y(y), currDirY(0), prevCh(Board::EMPTY),
-		icon(symbol), isColor(isColor), color(nullptr),	board(b) {}
+	Asset(int x, int y, char symbol, Board& b, bool& isColor);
 
 public:
 	virtual ~Asset() {
@@ -30,6 +31,10 @@ public:
 	void calculatePrevPos();
 	virtual void drawToConsole() const = 0;
 	virtual void drawToBoard() = 0;
-	virtual void eraseFromConsole() const = 0;
-	void eraseFromBoard() const { board.setBoardChar(prevPosX, prevPosY, prevCh); }
+	void eraseFromConsole() const;
+	void eraseFromBoard() const;
+
+	// Getters
+	int getX() const { return x; }
+	int getY() const { return y; }
 };

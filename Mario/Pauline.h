@@ -1,5 +1,9 @@
 #pragma once
 #include "Character.h"
+#include "Colors.h"
+
+// Forward declaration
+class Board;
 
 class Pauline : public Character {
 
@@ -7,10 +11,9 @@ class Pauline : public Character {
 	bool hasMarioArrived;
 
 public:
-	Pauline(int x, int y, bool& isColor, Board& b) : Character(x, y, PAULINE_ICON, isColor, b), hasMarioArrived(false) {} // Constructor
+	Pauline(int x, int y, Board& b, bool& isColor) : Character(x, y, PAULINE_ICON, b, isColor), hasMarioArrived(false) {} // Constructor
 
 	static constexpr char PAULINE_ICON = '$';
-	bool checkWinCondition() { return hasMarioArrived; }
+	bool checkWinCondition() const { return hasMarioArrived; }
 	void updateWinCondition(int marioX, int marioY);
-	void reset() { hasMarioArrived = false; }
 };
