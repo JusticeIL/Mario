@@ -1,4 +1,5 @@
 #include "Enemy.h"
+#include "Board.h"
 #include "Barrel.h"
 #include "BigGhost.h"
 #include "Mario.h"
@@ -39,11 +40,4 @@ bool Enemy::isValidToMove() {
 	default: // Any others
 		return false;
 	}
-}
-
-void Enemy::updateIfHitMario(int marioX, int marioY) {
-	int nextPosX = x + currDirX;
-	int nextPosY = y + currDirY;
-
-	isEnemyHitMario = (nextPosX == marioX && nextPosY == marioY);
 }

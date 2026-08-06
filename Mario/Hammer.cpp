@@ -1,81 +1,120 @@
 #include <iostream>
 #include <windows.h>
 #include "Hammer.h"
+#include "Board.h"
 #include "Barrel.h"
 #include "SmallGhost.h"
 #include "BigGhost.h"
 #include "HelperFunc.h"
 #include "Colors.h"
+#include "Tiles.h"
 
-void Hammer::use(int marioX, int marioY, int xDirection, int yDirection, bool* hammerUsed) {
+void Hammer::use(int marioX, int marioY, int xDirection, bool* hammerUsed) {
 	*hammerUsed = true;
 
-	// Hammer position logic depending on Mario's direction
-	if (xDirection == -1 || xDirection == 1) {
-		hammerPos_x[0] = marioX + xDirection;
-		hammerPos_y[0] = marioY + yDirection;
-		hammerPos_x[1] = marioX + xDirection * 2;
-		hammerPos_y[1] = marioY + yDirection;
-	}
-	else if (xDirection == 0) { // Case: Mario not moving and therefore cannot use hammer
+	// 1. Calculate Hammer position logic based on Mario's direction
+	if (xDirection == 0 || state != HammerState::Idle) {
 		*hammerUsed = false;
 		return;
 	}
 
-	// Check if hammer positions are valid
-	char nextCh[3] = {};
-	for (int i = 0; i < 2; i++) {
-		nextCh[i] = board.getBoardChar(hammerPos_x[i], hammerPos_y[i]);
-		if (nextCh[i] == Board::WALL || !board.isWithinBounds(hammerPos_x[i], hammerPos_y[i])) { // Case: hammer hits a wall or goes out of bounds
-			*hammerUsed = false;
-			return;
-		}
+	hammerPosX[0] = marioX + xDirection;
+	hammerPosX[1] = marioX + (xDirection * 2);
+	hammerPosY = marioY;
+
+	// 2. Check if hammer initial bounds are valid
+	if (!board.isWithinBounds(hammerPosX[0], hammerPosY) || board.getBoardChar(hammerPosX[0], hammerPosY) == Board::WALL) {
+		*hammerUsed = false;
+		return;
 	}
 
-	// Update board but do not print
-	for (int i = 0; i < 2; i++) {
-		board.setBoardChar(hammerPos_x[i], hammerPos_y[i], HAMMER_ICON);
-		prevHammerChars[i] = nextCh[i];
-	}
-
-	draw();
-	Sleep(USE_TIME);
-	grab();
+	state = HammerState::HalfDeployed;
 }
 
-void Hammer::grab() {
-	for (int i = 0; i < 2; i++) {
-		if (prevHammerChars[i] != Barrel::BARREL_ICON && prevHammerChars[i] != SmallGhost::SMALL_GHOST_ICON && prevHammerChars[i] != BigGhost::BIG_GHOST_ICON) {
-			board.setBoardChar(hammerPos_x[i], hammerPos_y[i], prevHammerChars[i]); // Erase from board
+void Hammer::updateState() {
+	switch (state) {
+		case HammerState::HalfDeployed:
+			prevHammerChars[0] = board.getBoardChar(hammerPosX[0], hammerPosY);
+			board.setBoardChar(hammerPosX[0], hammerPosY, HAMMER_ICON);
+			draw(0);
+
+			state = HammerState::FullyDeployed;
+			break;
+		case HammerState::FullyDeployed:
+		if (board.isWithinBounds(hammerPosX[1], hammerPosY) && board.getBoardChar(hammerPosX[1], hammerPosY) != Board::WALL) {
+			prevHammerChars[1] = board.getBoardChar(hammerPosX[1], hammerPosY);
+			board.setBoardChar(hammerPosX[1], hammerPosY, HAMMER_ICON);
+			draw(1);
 		}
+		else
+			hammerPosX[1] = -1; // Mark out of bounds for grab()
+			
+			state = HammerState::RestoreAndIdle;
+			break;
+	case HammerState::RestoreAndIdle:
+		grab();
+		state = HammerState::Idle;
+		break;
+	default:
+		break;
 	}
-	erase();
 }
 
-void Hammer::draw() const { // TODO: when implementing, need to check if hammerUsed is true
-		for (int i = 0; i < 2; i++) {
-		gotoxy(hammerPos_x[i], hammerPos_y[i]);
-		if (isColor) {
-			std::cout << HAMMER_COLOR << HAMMER_ICON << RESET;
-		}
-		else { // Case: no color mode
-			std::cout << HAMMER_ICON;
-		}
+void Hammer::grab() const {
+	for (int i = 0; i < 2; ++i) {
+		if (hammerPosX[i] == -1)
+			continue;
+
+		eraseHammerCharsFromBoard(i); // Erase the hammer from the board
+		eraseHammerCharsFromConsole(i); // Erase the hammer from the console
 	}
 }
 
-void Hammer::erase() const {
-	for (int i = 0; i < 2; i++) {
-		if (prevHammerChars[i] != Barrel::BARREL_ICON && prevHammerChars[i] != SmallGhost::SMALL_GHOST_ICON && prevHammerChars[i] != BigGhost::BIG_GHOST_ICON) {
-			gotoxy(hammerPos_x[i], hammerPos_y[i]);
-			std::cout << prevHammerChars[i];
-		}
+void Hammer::draw(int radius) const {
+	if (hammerPosX[radius] == -1)
+		return;
+
+	gotoxy(hammerPosX[radius], hammerPosY);
+	if (isColor)
+		std::cout << HAMMER_COLOR << HAMMER_ICON << RESET;
+	else
+		std::cout << HAMMER_ICON;
+}
+
+void Hammer::eraseHammerCharsFromBoard(int radius) const {
+	if (prevHammerChars[radius] == Barrel::BARREL_ICON || prevHammerChars[radius] == SmallGhost::SMALL_GHOST_ICON
+		|| prevHammerChars[radius] == BigGhost::BIG_GHOST_ICON) {
+		char originalChar = board.getLevel().getOriginalLevel()[hammerPosY][hammerPosX[radius]];
+
+		if (originalChar == Board::LADDER || Tiles::isTile(originalChar)) 
+			board.setBoardChar(hammerPosX[radius], hammerPosY, originalChar);
+		else // Case: could be entity respawn point
+			board.setBoardChar(hammerPosX[radius], hammerPosY, Board::EMPTY);
 	}
+	else
+		board.setBoardChar(hammerPosX[radius], hammerPosY, prevHammerChars[radius]);
+}
+
+void Hammer::eraseHammerCharsFromConsole(int radius) const {
+	gotoxy(hammerPosX[radius], hammerPosY);
+	if (prevHammerChars[radius] == Barrel::BARREL_ICON || prevHammerChars[radius] == SmallGhost::SMALL_GHOST_ICON
+		|| prevHammerChars[radius] == BigGhost::BIG_GHOST_ICON) {
+		char originalChar = board.getLevel().getOriginalLevel()[hammerPosY][hammerPosX[radius]];
+
+		if (originalChar == Board::LADDER || Tiles::isTile(originalChar))
+			std::cout << originalChar;
+		else // Case: could be entity respawn point
+			std::cout << Board::EMPTY;
+	}
+	else 
+		std::cout << prevHammerChars[radius];
 }
 
 void Hammer::reset() {
-	std::memset(hammerPos_x, -1, sizeof(hammerPos_x)); // Reset to an invalid position
-	std::memset(hammerPos_y, -1, sizeof(hammerPos_y)); // Reset to an invalid position
+	std::memset(hammerPosX, -1, sizeof(hammerPosX)); // Reset to an invalid position
 	std::memset(prevHammerChars, Board::EMPTY, sizeof(prevHammerChars)); // Reset previous chars to empty
+
 	isCollected = false;
+	hammerPosY = -1;
+	state = HammerState::Idle;
 }

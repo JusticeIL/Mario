@@ -7,15 +7,13 @@ protected:
 	bool isCollected;
 
 	void drawToConsole() const override;
-	void drawToBoard() override { prevCh = board.getBoardChar(x, y); board.setBoardChar(x, y, icon); }
-	void eraseFromConsole() const override;
-	void eraseFromBoard() override { board.setBoardChar(x, y, prevCh); }
+	void drawToBoard() override;
 
 public:
-	Item(int x, int y, char symbol, bool& isColor, Board& b) : Asset(x, y, symbol, isColor, b),
+	Item(int x, int y, char symbol, Board& b, bool& isColor) : Asset(x, y, symbol, b, isColor),
 		isCollected(false) {}
 	virtual ~Item() = default;
 
-	void setCollected() { isCollected = true; }
+	virtual void setCollected() { isCollected = true; }
 };
 

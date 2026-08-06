@@ -1,6 +1,8 @@
 #pragma once
 #include "Asset.h"
-#include "Board.h"
+
+// Forward declaration
+class Board;
 
 class Character : public Asset {
 
@@ -8,10 +10,9 @@ protected:
 	bool isDead;
 	void drawToConsole() const override;
 	void drawToBoard() override;
-	void eraseFromConsole() const override;
 
 public:
-	Character(int x, int y, char symbol, bool& isColor, Board& b) : Asset(x, y, symbol, isColor, b),
+	Character(int x, int y, char symbol, Board& b, bool& isColor) : Asset(x, y, symbol, b, isColor),
 		isDead(false) {}
 	virtual ~Character() = default;
 

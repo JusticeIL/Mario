@@ -1,11 +1,9 @@
 #include <iostream>
 #include <windows.h>
 #include "Barrel.h"
-#include "BigGhost.h"
-#include "Hammer.h"
+#include "Board.h"
 #include "HelperFunc.h"
 #include "Mario.h"
-#include "SmallGhost.h"
 #include "Tiles.h"
 
 // This function saves the characters around the barrel's explosion area into a temporary array for later restoration
@@ -18,7 +16,7 @@ void Barrel::savePreviousCharsExplosion() {
 			if (board.isWithinBounds(x + dx, y + dy)) { // Ensure board limits
 				char boardChar = board.getBoardChar(x + dx, y + dy);
 
-				if (boardChar == '@') {
+				if (boardChar == Mario::MARIO_ICON) {
 					isEnemyHitMario = true;
 				}
 
@@ -132,6 +130,12 @@ void Barrel::restorePrevChars() const {
 }
 
 void Barrel::move() {
+	// Explosion Intercept
+	if (explosionState != ExplosionState::NotExploding) {
+		processExplosion();
+		return;
+	}
+
 	calculatePrevPos();
 	eraseFromBoard();
 	eraseFromConsole();
@@ -205,7 +209,7 @@ void Barrel::setDirection() {
 
 void Barrel::fall() {
 	if (fallCounter >= 8 && (!isOnAir || y == (GameManager::MAX_Y - 1))) {
-		explode();
+		startExplode();
 		return;
 	}
 
@@ -223,18 +227,29 @@ void Barrel::fall() {
 }
 
 // This function triggers the barrel's explosion, manages the explosion effects, restores the affected area, and marks the barrel as exploded
-void Barrel::explode() {
-	eraseFromBoard(); // Remove char of barrel
+void Barrel::processExplosion() {
+	switch (explosionState) {
+	case ExplosionState::Radius1:
+		// Remove char of barrel
+		eraseFromBoard();
+		eraseFromConsole();
 
-	// Define the prevChars array and initialize to ' '
-	memset(prevChars, Board::EMPTY, sizeof(prevChars));
-
-	// Explosion FX
-	savePreviousCharsExplosion();
-	create_first_radius_exp();
-	delete_first_radius_exp();
-	create_second_radius_exp();
-	restorePrevChars();
-
-	isDead = true; // End of explosion
+		// Define the prevChars array and initialize to ' '
+		memset(prevChars, Board::EMPTY, sizeof(prevChars));
+		savePreviousCharsExplosion();
+		create_first_radius_exp();
+		explosionState = ExplosionState::Radius2;
+		break;
+	case ExplosionState::Radius2:
+		delete_first_radius_exp();
+		create_second_radius_exp();
+		explosionState = ExplosionState::RestoreAndDie;
+		break;
+	case ExplosionState::RestoreAndDie:
+		restorePrevChars();
+		isDead = true; // End of explosion
+		break;
+	default:
+		break;
+	}
 }

@@ -10,7 +10,7 @@ class BigGhost : public Ghost {
 	bool onLadder;
 
 public:
-	BigGhost(int x, int y, bool& isColor, int& marioX, int& marioY, Board& b) : Ghost(x, y, BIG_GHOST_ICON, isColor, b),
+	BigGhost(int x, int y, Board& b, bool& isColor, int& marioX, int& marioY) : Ghost(x, y, BIG_GHOST_ICON, b, isColor),
 		marioX(marioX), marioY(marioY), onLadder(false) {}
 
 	static constexpr char BIG_GHOST_ICON = 'X';
@@ -20,4 +20,5 @@ public:
 	bool tryClimb();
 	void updateState();
 	void move() override;
+	bool isValidToMove() override;
 };

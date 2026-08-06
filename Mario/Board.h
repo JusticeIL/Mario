@@ -2,10 +2,11 @@
 #include <vector>
 #include "GameManager.h"
 #include "Colors.h"
+#include "Level.h"
 
 class Board {
 
-	Level currentOriginalLevel;
+	const Level* currentOriginalLevel;
 	std::vector<std::string> gameBoard;
 
 public:
@@ -17,11 +18,15 @@ public:
 	static constexpr const char* TILES_COLOR = BRIGHT_RED;
 
 	// Board state
-	void reset() { gameBoard = currentOriginalLevel.getOriginalLevel(); }
+	void reset(unsigned int marioLife);
 	void print() const;
 
-	bool isWithinBounds(int x, int y) { return (GameManager::MIN_X <= x && x < GameManager::MAX_X && GameManager::MIN_Y <= y && y < GameManager::MAX_Y); }
-	char getBoardChar(int x, int y) const { return gameBoard[y][x]; }
-	void setBoardChar(int x, int y, char ch) { gameBoard[y][x] = ch; }
-	Level getLevel() { return currentOriginalLevel; }
+	// Edge case handling
+	bool isWithinBounds(int x, int y) const { return (GameManager::MIN_X <= x && x < GameManager::MAX_X && GameManager::MIN_Y <= y && y < GameManager::MAX_Y); }
+
+	// Getters & Setters
+	char getBoardChar(int x, int y) const;
+	void setBoardChar(int x, int y, char ch);
+	Level getLevel() { return *currentOriginalLevel; }
+	void setLevel(const Level* newLevel);
 };

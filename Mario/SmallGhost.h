@@ -3,7 +3,6 @@
 #include <random>
 #include "Colors.h"
 
-
 class SmallGhost : public Ghost {
 
 	// Constants
@@ -17,13 +16,14 @@ class SmallGhost : public Ghost {
 	void changeGhostDirection() { currDirX = currDirX * (-1); }
 
 public:
-	SmallGhost(int x, int y, bool& isColor, Board& b, unsigned int seed) : Ghost(x, y, SMALL_GHOST_ICON, isColor, b),
+	SmallGhost(int x, int y, Board& b, bool& isColor, unsigned int seed) : Ghost(x, y, SMALL_GHOST_ICON, b, isColor),
 		savedSeed(seed), gen(seed), dist(1, 100) {
 		currDirX = 1; // Initial direction to the right after parent initialization
 	}
 
 	static constexpr char SMALL_GHOST_ICON = 'x';
 
+	bool isValidToMove() override;
 	void move() override;
 	unsigned int getRandomNumber() { return dist(gen); }
 	void setDirection();

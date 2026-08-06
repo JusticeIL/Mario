@@ -1,10 +1,14 @@
 #include <fstream>
 #include <filesystem>
 #include "ScreenLoader.h"
-
+#include "Board.h"
 #include "BigGhost.h"
 #include "Mario.h"
 #include "SmallGhost.h"
+#include "Pauline.h"
+#include "DonkeyKong.h"
+#include "Hammer.h"
+#include "Tiles.h"
 
 using point = std::pair<int, int>;
 
@@ -23,7 +27,7 @@ std::list<std::string> ScreenLoader::getScreenFileNames() {
     return FilesFromFolder;
 }
 
-Level* ScreenLoader::TryLoadLevel(const string fileName) {
+Level* ScreenLoader::TryLoadLevel(const std::string fileName) {
 
 	std::ifstream file(fileName);
 
@@ -36,94 +40,119 @@ Level* ScreenLoader::TryLoadLevel(const string fileName) {
 	unsigned int paulineCount = 0;
     unsigned int donkeyKongCount = 0;
     unsigned int legendCount = 0;
+    bool hasTile = false;
+    bool hasWall = false;
 
 	point marioSpawn(-1, -1);
 	point paulineSpawn(-1, -1);
 	point donkeyKongSpawn(-1, -1);
+    point hammerSpawn(-1, -1);
     point legendPosition(-1, -1);
 
     std::list<point> ghostsSpawns;
-    std::list<point> hammerSpawns;
     std::list<point> extraLifeSpawns;
     std::string line;
     size_t row = 0;
 
     while (getline(file, line)) {
         for (size_t i = 0; i < line.size(); ++i) {
-            if (line[i] == Mario::MARIO_ICON) { // Find mario
+            if (line[i] == Mario::MARIO_ICON) { // Found mario
                 ++marioCount;
-                marioSpawn = std::make_pair(i, row);
+                marioSpawn = std::make_pair(static_cast<int>(i), static_cast<int>(row));
+                line[i] = Board::EMPTY;
             }
 
-            if (line[i] == Pauline::PAULINE_ICON) { // Find Pauline
+            if (line[i] == Pauline::PAULINE_ICON) { // Found Pauline
                 ++paulineCount;
-                paulineSpawn = std::make_pair(i, row);
+                paulineSpawn = std::make_pair(static_cast<int>(i), static_cast<int>(row));
             }
 
-            if (line[i] == DonkeyKong::DONKEY_KONG_ICON) { // Find DK
+            if (line[i] == DonkeyKong::DONKEY_KONG_ICON) { // Found DK
                 ++donkeyKongCount;
-                donkeyKongSpawn = std::make_pair(i, row);
+                donkeyKongSpawn = std::make_pair(static_cast<int>(i), static_cast<int>(row));
             }
-
-            if (line[i] == 'L') // Find legend
-                ++legendCount;
-
-            if (line[i] == BigGhost::BIG_GHOST_ICON)
-                ghostsSpawns.emplace_back(i, row);
-
-            if (line[i] == SmallGhost::SMALL_GHOST_ICON)
-                ghostsSpawns.emplace_back(i, row);
 
             if (line[i] == Hammer::HAMMER_ICON)
-                hammerSpawns.emplace_back(i, row);
+                hammerSpawn = std::make_pair(static_cast<int>(i), static_cast<int>(row));
+
+            if (line[i] == 'L') { // Found legend
+                ++legendCount;
+				legendPosition = std::make_pair(static_cast<int>(i), static_cast<int>(row));
+            }
+
+            if (Tiles::isTile(line[i])) // Found at least one tile
+                hasTile = true;
+
+            if (line[i] == Board::WALL) // Found at least one wall
+                hasWall = true;
+
+            if (line[i] == BigGhost::BIG_GHOST_ICON) 
+                ghostsSpawns.emplace_back(static_cast<int>(i), static_cast<int>(row));
+
+            if (line[i] == SmallGhost::SMALL_GHOST_ICON)
+                ghostsSpawns.emplace_back(static_cast<int>(i), static_cast<int>(row));
 
             /* TODO: if (line[i] == ExtraLife::EXTRA_LIFE_ICON)
-                extraLifeSpawns.emplace_back(i, row); */
+                extraLifeSpawns.emplace_back(static_cast<int>(i), static_cast<int>(row)); */
         }
 
-        lvl.emplace_back(line);
+        std::string padded_line = line;
+        if (padded_line.length() < GameManager::MAX_X)
+            padded_line.append(GameManager::MAX_X - padded_line.length(), Board::EMPTY);
+        
+        else if (padded_line.length() > GameManager::MAX_X) 
+            padded_line = padded_line.substr(0, GameManager::MAX_X); // Cut off extra characters
+        
+        lvl.emplace_back(padded_line);
+        row++;
+    }
+
+    // If the file had fewer rows than MAX_Y, fill the rest of the board with empty strings.
+    while (row < GameManager::MAX_Y) {
+        lvl.emplace_back(std::string(GameManager::MAX_X, Board::EMPTY));
         row++;
     }
 
     if (marioCount != 1 || paulineCount != 1 || donkeyKongCount != 1 || legendCount != 1) {
-        string errorString;
+        std::string errorString;
 
         if (marioCount != 1) {
-	        if (marioCount < 1) {
-                errorString += "Error: No mario detected." + "\n";
-            } else if (marioCount > 1) {
-                errorString += "Error: Too many marios detected (Required 1 but detected " + std::to_string(marioCount) + ")." + "\n";
-			}
+	        if (marioCount < 1)
+                errorString += std::string("Error: No mario detected.") + "\n";
+            else if (marioCount > 1) 
+                errorString += std::string("Error: Too many marios detected (Required 1 but detected ") + std::to_string(marioCount) + ")." + "\n";
         }
 
         if (paulineCount != 1) {
-	        if (paulineCount < 1) {
-                errorString += "Error: No Pauline detected." + "\n";
-            } else if (paulineCount > 1) {
-                errorString += "Error: Too many Paulines detected (Required 1 but detected " + std::to_string(paulineCount) + ")." + "\n";
-			}
+	        if (paulineCount < 1) 
+                errorString += std::string("Error: No Pauline detected.") + "\n";
+	        else if (paulineCount > 1) 
+                errorString += std::string("Error: Too many Paulines detected (Required 1 but detected ") + std::to_string(paulineCount) + ")." + "\n";
         }
 
 		if (donkeyKongCount != 1) {
-	        if (donkeyKongCount < 1) {
-                errorString += "Error: No Donkey Kong detected." + "\n";
-            } else if (donkeyKongCount > 1) {
-                errorString += "Error: Too many Donkey Kongs detected (Required 1 but detected " + std::to_string(donkeyKongCount) + ")." + "\n";
-			}
+	        if (donkeyKongCount < 1) 
+                errorString += std::string("Error: No Donkey Kong detected.") + "\n";
+            else if (donkeyKongCount > 1) 
+                errorString += std::string("Error: Too many Donkey Kongs detected (Required 1 but detected ") + std::to_string(donkeyKongCount) + ")." + "\n";
         }
 
         if (legendCount != 1) {
-            if (legendCount < 1) {
-                errorString += "Error: No Legend position detected." + "\n";
-            }
-            else if (legendCount > 1) {
+            if (legendCount < 1) 
+                errorString += std::string("Error: No Legend position detected.") + "\n";
+            else if (legendCount > 1)
                 errorString += "Error: Too many Legend positions detected (Required 1 but detected " + std::to_string(legendCount) + ")." + "\n";
-            }
         }
+
+        if (!hasTile) 
+            errorString += std::string("Error: No tile detected.") + "\n";
+
+        if (!hasWall)
+	        errorString += std::string("Error: No wall detected.") + "\n";
 
         errorString.pop_back();
         throw std::invalid_argument(errorString);
     }
 
-	return new Level(fileName, lvl, marioSpawn, donkeyKongSpawn, paulineSpawn, legendPosition, ghostsSpawns, hammerSpawns, extraLifeSpawns);
+	return new Level(fileName, lvl, marioSpawn, donkeyKongSpawn, paulineSpawn, legendPosition, ghostsSpawns, hammerSpawn, extraLifeSpawns);
 }
