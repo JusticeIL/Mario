@@ -10,7 +10,7 @@ protected:
 	bool isEnemyHitMario;
 
 public:
-	Enemy(int x, int y, char symbol, Board& b, bool& isColor) : Character(x, y, symbol, b, isColor),
+	Enemy(int x, int y, char symbol, const char* color, Board& b, bool& isColor) : Character(x, y, symbol, color, b, isColor),
 		isEnemyHitMario(false) {}
 
 	bool isHitMario() const { return isEnemyHitMario; }

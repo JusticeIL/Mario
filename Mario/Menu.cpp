@@ -4,6 +4,8 @@
 #include <vector>
 #include "Menu.h"
 #include "Colors.h"
+#include "Mario.h"
+#include "Pauline.h"
 
 // This function manages the main game loop, handles transitions between different game states, and coordinates user inputs and game actions
 void Menu::run() {
@@ -216,6 +218,24 @@ char Menu::handleMenu() {
         }
         Sleep(10); // Prevent 100% CPU Usage
     }
+}
+
+void Menu::printInstructionsScreen() const {
+	gotoxy(0, 0);
+	std::cout << instructionsScreen;
+
+	gotoxy(20, 5);
+	std::cout << static_cast<char>(Key::Left);
+	gotoxy(27, 5);
+	std::cout << static_cast<char>(Key::Right);
+	gotoxy(27, 7);
+	std::cout << static_cast<char>(Key::Up);
+	gotoxy(30, 9);
+	std::cout << static_cast<char>(Key::Down);
+	gotoxy(33, 11);
+	std::cout << static_cast<char>(Key::Stay);
+	gotoxy(51, 13);
+	std::cout << Pauline::PAULINE_ICON;
 }
 
 void Menu::printConsoleLogScreen(size_t currentErrorPage) {

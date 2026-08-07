@@ -14,14 +14,14 @@ void Character::drawToBoard() {
 	if (!isDead) {
 		char currentBoardChar = board.getBoardChar(x, y);
 
-		if (currentBoardChar == Mario::MARIO_ICON || currentBoardChar == Barrel::BARREL_ICON ||
-			currentBoardChar == SmallGhost::SMALL_GHOST_ICON || currentBoardChar == BigGhost::BIG_GHOST_ICON ||
+		if (currentBoardChar == Mario::MARIO_ICON || currentBoardChar == Mario::MARIO_HAMMER_ICON ||
+			currentBoardChar == Barrel::BARREL_ICON || currentBoardChar == SmallGhost::SMALL_GHOST_ICON || currentBoardChar == BigGhost::BIG_GHOST_ICON ||
 			currentBoardChar == Pauline::PAULINE_ICON || currentBoardChar == DonkeyKong::DONKEY_KONG_ICON) {
 
 			char originalChar = board.getLevel().getOriginalLevel()[y][x];
 
-			if (originalChar == Mario::MARIO_ICON || originalChar == Barrel::BARREL_ICON ||
-				originalChar == SmallGhost::SMALL_GHOST_ICON || originalChar == BigGhost::BIG_GHOST_ICON ||
+			if (originalChar == Mario::MARIO_ICON || originalChar == Mario::MARIO_HAMMER_ICON ||
+				originalChar == Barrel::BARREL_ICON || originalChar == SmallGhost::SMALL_GHOST_ICON || originalChar == BigGhost::BIG_GHOST_ICON ||
 				originalChar == Pauline::PAULINE_ICON || originalChar == DonkeyKong::DONKEY_KONG_ICON ||
 				originalChar == Hammer::HAMMER_ICON)
 				prevCh = Board::EMPTY;

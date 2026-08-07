@@ -10,7 +10,7 @@ protected:
 	void drawToBoard() override;
 
 public:
-	Item(int x, int y, char symbol, Board& b, bool& isColor) : Asset(x, y, symbol, b, isColor),
+	Item(int x, int y, char symbol, const char* color, Board& b, bool& isColor) : Asset(x, y, symbol, color, b, isColor),
 		isCollected(false) {}
 	virtual ~Item() = default;
 

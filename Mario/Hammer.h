@@ -8,7 +8,6 @@ class Board;
 
 class Hammer : public Item {
 
-	static constexpr const char* HAMMER_COLOR = BROWN;
 	int hammerPosX[2];
 	int hammerPosY;
 	char prevHammerChars[2];
@@ -18,7 +17,7 @@ class Hammer : public Item {
 	HammerState state;
 
 public:
-	Hammer(int x, int y, Board& b, bool& isColor) : Item(x, y, HAMMER_ICON, b, isColor) {
+	Hammer(int x, int y, Board& b, bool& isColor) : Item(x, y, HAMMER_ICON, HAMMER_COLOR, b, isColor) {
 		std::memset(hammerPosX, 0, sizeof(hammerPosX));
 		std::memset(prevHammerChars, '\0', sizeof(prevHammerChars));
 		hammerPosY = -1;
@@ -26,6 +25,7 @@ public:
 	}
 
 	static constexpr char HAMMER_ICON = 'p';
+	static constexpr const char* HAMMER_COLOR = BROWN;
 
 	void use(int marioX, int marioY, int xDirection, bool* hammerUsed);
 	void updateState();

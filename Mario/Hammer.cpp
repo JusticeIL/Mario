@@ -97,17 +97,31 @@ void Hammer::eraseHammerCharsFromBoard(int radius) const {
 
 void Hammer::eraseHammerCharsFromConsole(int radius) const {
 	gotoxy(hammerPosX[radius], hammerPosY);
+	char charToPrint = prevHammerChars[radius];
+
+	// Resolve the original character if we hit an enemy
 	if (prevHammerChars[radius] == Barrel::BARREL_ICON || prevHammerChars[radius] == SmallGhost::SMALL_GHOST_ICON
 		|| prevHammerChars[radius] == BigGhost::BIG_GHOST_ICON) {
 		char originalChar = board.getLevel().getOriginalLevel()[hammerPosY][hammerPosX[radius]];
 
 		if (originalChar == Board::LADDER || Tiles::isTile(originalChar))
-			std::cout << originalChar;
+			charToPrint = originalChar;
 		else // Case: could be entity respawn point
-			std::cout << Board::EMPTY;
+			charToPrint = Board::EMPTY;
 	}
-	else 
-		std::cout << prevHammerChars[radius];
+	
+	if (isColor) {
+		if (charToPrint == Board::LADDER)
+			std::cout << Board::LADDER_COLOR << charToPrint << RESET;
+		else if (Tiles::isTile(charToPrint))
+			std::cout << Board::TILES_COLOR << charToPrint << RESET;
+		else if (charToPrint == Board::WALL)
+			std::cout << Board::WALL_COLOR << charToPrint << RESET;
+		else
+			std::cout << charToPrint;
+	}
+	else
+		std::cout << charToPrint;
 }
 
 void Hammer::reset() {

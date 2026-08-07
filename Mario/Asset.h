@@ -15,12 +15,12 @@ protected:
 	char prevCh;
 	char icon;
 	const bool& isColor;
-	char* color;
+	const char* color;
 
 	// Board
 	Board& board;
 
-	Asset(int x, int y, char symbol, Board& b, bool& isColor);
+	Asset(int x, int y, char symbol, const char* color, Board& b, bool& isColor);
 
 public:
 	virtual ~Asset() {

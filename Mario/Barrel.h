@@ -1,5 +1,6 @@
 #pragma once
 #include <cstring>
+#include "Colors.h"
 #include "MovingEnemy.h"
 
 class Barrel : public MovingEnemy {
@@ -16,7 +17,7 @@ class Barrel : public MovingEnemy {
 	enum class ExplosionState {	NotExploding, Radius1, Radius2, RestoreAndDie };
 	ExplosionState explosionState;
 
-	Barrel(int x, int y, Board& b, bool& isColor) : MovingEnemy(x, y, BARREL_ICON, b, isColor),
+	Barrel(int x, int y, Board& b, bool& isColor) : MovingEnemy(x, y, BARREL_ICON, BARREL_COLOR, b, isColor),
 		fallCounter(0), isOnAir(false), lastDir_x(0) { // Constructor
 		std::memset(prevChars, '\0', sizeof(prevChars));
 		explosionState = ExplosionState::NotExploding;
@@ -38,6 +39,7 @@ class Barrel : public MovingEnemy {
 
 public:
 	static constexpr char BARREL_ICON = 'O';
+	static constexpr const char* BARREL_COLOR = ORANGE;
 
 	// Barrel movement
 	void move() override;

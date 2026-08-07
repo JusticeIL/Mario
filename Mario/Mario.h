@@ -5,29 +5,28 @@
 // Forward declaration
 class Board;
 
+// Define available keys here:
+enum class Key : char {
+	Up = 'w',
+	Left = 'a',
+	Down = 'x',
+	Right = 'd',
+	Stay = 's',
+	PlayHammer = 'p',
+	Init = '\0'
+};
+
 class Mario : public Character {
 
-	// Define available keys here:
-	enum class Key : char {
-		Up = 'w',
-		Left = 'a',
-		Down = 'x',
-		Right = 'd',
-		Stay = 's',
-		PlayHammer = 'p',
-		Init = '\0'
-	};
-
 	// Constants
-	static constexpr const char* MARIO_COLOR = RED;
-	static constexpr const char* HAMMER_COLOR = BLUE;
+	static constexpr const char* MARIO_COLOR = MARIO_PEACH;
 	static constexpr int MAX_JUMP_HEIGHT = 2;
 	static constexpr int MAX_FALL_COUNTER = 5;
 
 	// Mario's position and movement
 	int startPosX;
 	int startPosY;
-	Key pressedkey;
+	Key pressedKey;
 
 	// Life
 	unsigned int life;
@@ -45,8 +44,8 @@ class Mario : public Character {
 	Hammer* hammer;
 
 public:
-	Mario(int x, int y, Board& b, bool& isColor) : Character(x, y, MARIO_ICON, b, isColor),
-		startPosX(x), startPosY(y), pressedkey(Key::Stay),
+	Mario(int x, int y, Board& b, bool& isColor) : Character(x, y, MARIO_ICON, MARIO_COLOR, b, isColor),
+		startPosX(x), startPosY(y), pressedKey(Key::Stay),
 		life(3),
 		jumpCounter(0), fallCounter(0), isOnGround(true), canJump(true), jumping(false), onLadder(false), falling(false),
 		hammer(nullptr)	{
@@ -59,14 +58,17 @@ public:
 	static constexpr char MARIO_HAMMER_ICON = 'M';
 	static constexpr char HAMMER_ICON = 'P';
 
+	// Getters
 	int& getMarioXRef() { return x; }
 	int& getMarioYRef() { return y; }
 	int getMarioX() const { return x; }
 	int getMarioY() const { return y; }
-
 	char getMarioIcon() const { return icon; }
 
+	// Setters
+	void setSpawnPoint(int newX, int newY) { startPosX = newX; startPosY = newY; }
 	void setPressedKey(char ch);
+
 	void updateState();
 	bool isValidToMove();
 	void resetDir() { currDirX = 0;	currDirY = 0; }

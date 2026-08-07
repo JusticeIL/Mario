@@ -77,15 +77,15 @@ class Menu {
         "Q                                 Instructions:                               Q\n"
         "Q                                 ____________                                Q\n"
         "Q                                                                             Q\n"
-        "Q              Use 'a' or 'd' to move left or right accordingly               Q\n"
+        "Q              Use ' ' or ' ' to move left or right accordingly               Q\n"
         "Q                                                                             Q\n"
-        "Q                     Use 'w' to jump or go up the ladder                     Q\n"
+        "Q                     Use ' ' to jump or go up the ladder                     Q\n"
         "Q                                                                             Q\n"
-        "Q                        Use 'x' to go down the ladder         ...            Q\n"
+        "Q                        Use ' ' to go down the ladder         ...            Q\n"
         "Q                                                             (()))           Q\n"
-        "Q                           Use 's' to stay in place          {' ())          Q\n"
+        "Q                           Use ' ' to stay in place          {' ())          Q\n"
         "Q                                                              ) (()          Q\n"
-        "Q                    Goal: to reach the princess ('$') ->   @ (   ()          Q\n"
+        "Q                    Goal: to reach the princess (' ') ->   @ (   ()          Q\n"
         "Q                                                            \\7 \\ ) |         Q\n"
         "Q                                                            {)=== /\\         Q\n"
         "Q                                                             \\ |    |        Q\n"
@@ -228,7 +228,7 @@ class Menu {
 
     // Menu Display
     void printMainMenu() const { gotoxy(0, 0); std::cout << mainMenu; }
-    void printInstructionsScreen() const { gotoxy(0, 0); std::cout << instructionsScreen; }
+    void printInstructionsScreen() const;
     void printOptionsScreen() const { gotoxy(0, 0); std::cout << optionsScreen; }
     void printConsoleLogScreen(size_t currentErrorPage);
     void printPauseScreen() const { gotoxy(0, 0); std::cout << pauseScreen; }

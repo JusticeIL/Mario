@@ -1,5 +1,8 @@
 #include <iostream>
 #include "Board.h"
+#include "DonkeyKong.h"
+#include "Pauline.h"
+#include "Hammer.h"
 #include "HelperFunc.h"
 #include "Tiles.h"
 
@@ -14,13 +17,31 @@ void Board::reset(unsigned int marioLife) {
 }
 
 // This function prints the current state of the board
-void Board::print() const {
+void Board::print(bool isColor) const {
     gotoxy(0, 0);
     size_t currentIndex = 0;
     size_t totalLines = gameBoard.size();
 
     for (const string& line : gameBoard) {
-	    cout << line;
+	    if (isColor)
+            for (char ch : line) {
+                if (ch == LADDER)
+                    std::cout << LADDER_COLOR << ch << RESET;
+                else if (ch == WALL || Tiles::isTile(ch))
+                    std::cout << TILES_COLOR << ch << RESET;
+                else if (ch == Barrel::BARREL_ICON)
+                    std::cout << Barrel::BARREL_COLOR << ch << RESET;
+                else if (ch == DonkeyKong::DONKEY_KONG_ICON)
+					std::cout << DonkeyKong::DONKEYKONG_COLOR << ch << RESET;
+                else if (ch == Pauline::PAULINE_ICON)
+					std::cout << Pauline::PAULINE_COLOR << ch << RESET;
+                else if (ch == Hammer::HAMMER_ICON)
+					std::cout << Hammer::HAMMER_COLOR << ch << RESET;
+                else
+                    std::cout << ch;
+            }
+        else
+            cout << line;
 
         if (++currentIndex < totalLines)
             std::cout << endl;

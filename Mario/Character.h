@@ -12,7 +12,7 @@ protected:
 	void drawToBoard() override;
 
 public:
-	Character(int x, int y, char symbol, Board& b, bool& isColor) : Asset(x, y, symbol, b, isColor),
+	Character(int x, int y, char symbol, const char* color, Board& b, bool& isColor) : Asset(x, y, symbol, color, b, isColor),
 		isDead(false) {}
 	virtual ~Character() = default;
 
