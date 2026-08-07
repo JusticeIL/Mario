@@ -121,10 +121,23 @@ void Barrel::restorePrevChars() const {
 
 			// Ensure indexes of prevChars are inside board bounds
 			if (0 <= indexY && indexY < 3 && 0 <= indexX && indexX < 5)
-				if (board.isWithinBounds(x + dx, y + dy)) {// Ensure board limits
+				if (board.isWithinBounds(x + dx, y + dy)) { // Ensure board limits
 					gotoxy(x + dx, y + dy);
-					board.setBoardChar(x + dx, y + dy, prevChars[indexY][indexX]);
-					std::cout << prevChars[indexY][indexX];
+					char charToPrint = prevChars[indexY][indexX];
+					board.setBoardChar(x + dx, y + dy, charToPrint);
+					
+					if (isColor) {
+						if (charToPrint == Board::LADDER)
+							std::cout << Board::LADDER_COLOR << charToPrint << RESET;
+						else if (Tiles::isTile(charToPrint))
+							std::cout << Board::TILES_COLOR << charToPrint << RESET;
+						else if (charToPrint == Board::WALL)
+							std::cout << Board::WALL_COLOR << charToPrint << RESET;
+						else
+							std::cout << charToPrint;
+					}
+					else
+						std::cout << charToPrint;
 				}
 		}
 }

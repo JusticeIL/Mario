@@ -4,7 +4,7 @@
 class MovingEnemy : public Enemy {
 
 public:
-	MovingEnemy(int x, int y, char symbol, Board& b, bool& isColor) : Enemy(x, y, symbol, b, isColor) {}
+	MovingEnemy(int x, int y, char symbol, const char* color, Board& b, bool& isColor) : Enemy(x, y, symbol, color, b, isColor) {}
 
 	void executeMove(bool canMove);
 	virtual void move() = 0;

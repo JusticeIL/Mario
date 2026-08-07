@@ -26,7 +26,7 @@ GameManager::~GameManager() { // Destructor
 // This function initiates the gameplay, manages the snake movement, collision checks, and apple interactions
 GameManager::GameResult GameManager::playGame() {
 	static int ticks = 0;
-	board.print();
+	board.print(isColor);
 
 	while (true) {
 		// Handle user input
@@ -89,7 +89,8 @@ GameManager::GameResult GameManager::playGame() {
 			setupNewLevel();
 			mario->reset();
 			clearScr();
-			board.print();
+			board.reset(mario->marioLifePoints());
+			board.print(isColor);
 			ticks++;
 			continue; // Skips the rest of the tick since we just loaded a new level
 		}
@@ -148,9 +149,6 @@ void GameManager::clearAllEntities() {
 	delete donkeyKong;
 	donkeyKong = nullptr;
 
-	delete mario;
-	mario = nullptr;
-
 	delete pauline;
 	pauline = nullptr;
 
@@ -184,8 +182,10 @@ void GameManager::readGhosts(const Level& level) {
 }
 
 void GameManager::initializeMario(const Level& level) {
-	if (mario == nullptr)
+	if (mario == nullptr) // Case: first time setup
 		mario = new Mario(level.getMarioSpawnX(), level.getMarioSpawnY(), board, isColor);
+	else // Case: next level setup
+		mario->setSpawnPoint(level.getMarioSpawnX(), level.getMarioSpawnY());
 }
 
 void GameManager::initializeDonkeyKong(const Level& level) {
@@ -232,7 +232,7 @@ void GameManager::handleMarioDeath() {
 	initializeHammer(board.getLevel());
 
 	clearScr();
-	board.print();
+	board.print(isColor);
 }
 
 bool GameManager::checkWinCondition() const {

@@ -1,12 +1,8 @@
 #pragma once
 #include "Ghost.h"
 #include <random>
-#include "Colors.h"
 
 class SmallGhost : public Ghost {
-
-	// Constants
-	static constexpr const char* SMALL_GHOST_COLOR = RED;
 
 	// Seed variables
 	unsigned int savedSeed;

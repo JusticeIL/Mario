@@ -8,6 +8,7 @@ static constexpr char ORANGE[] = "\033[38;5;208m";
 static constexpr char BRIGHT_RED[] = "\033[91m";
 static constexpr char PINK[] = "\033[95m";
 static constexpr char BROWN[] = "\033[38;2;165;42;42m"; // RGB for brown
+static constexpr char MARIO_PEACH[] = "\033[38;2;251;186;150m"; // RGB for peach
 static constexpr char RESET[] = "\033[0m";
 
 // OK

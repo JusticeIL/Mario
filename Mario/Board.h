@@ -14,12 +14,12 @@ public:
 	static constexpr const char* LADDER_COLOR = CYAN;
 	static constexpr char EMPTY = ' ';
 	static constexpr char WALL = 'Q';
-	static constexpr const char* WALL_COLOR = BRIGHT_RED;
-	static constexpr const char* TILES_COLOR = BRIGHT_RED;
+	static constexpr const char* WALL_COLOR = PINK;
+	static constexpr const char* TILES_COLOR = PINK;
 
 	// Board state
 	void reset(unsigned int marioLife);
-	void print() const;
+	void print(bool isColor) const;
 
 	// Edge case handling
 	bool isWithinBounds(int x, int y) const { return (GameManager::MIN_X <= x && x < GameManager::MAX_X && GameManager::MIN_Y <= y && y < GameManager::MAX_Y); }
