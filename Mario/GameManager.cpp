@@ -1,5 +1,4 @@
 #include "GameManager.h"
-
 #include <conio.h>
 #include <random>
 #include <windows.h>
@@ -10,6 +9,7 @@
 #include "Mario.h"
 #include "Pauline.h"
 #include "DonkeyKong.h"
+#include "Legend.h"
 
 GameManager::~GameManager() { // Destructor
 	// Cleaning the levels list before exiting the game to avoid memory leaks
@@ -26,7 +26,7 @@ GameManager::~GameManager() { // Destructor
 // This function initiates the gameplay, manages the snake movement, collision checks, and apple interactions
 GameManager::GameResult GameManager::playGame() {
 	static int ticks = 0;
-	board.print(isColor);
+	board.print(isColor, *legend);
 
 	while (true) {
 		// Handle user input
@@ -89,8 +89,8 @@ GameManager::GameResult GameManager::playGame() {
 			setupNewLevel();
 			mario->reset();
 			clearScr();
-			board.reset(mario->marioLifePoints());
-			board.print(isColor);
+			board.reset();
+			board.print(isColor, *legend);
 			ticks++;
 			continue; // Skips the rest of the tick since we just loaded a new level
 		}
@@ -154,6 +154,9 @@ void GameManager::clearAllEntities() {
 
 	delete uncollectedHammer;
 	uncollectedHammer = nullptr;
+
+	delete legend;
+	legend = nullptr;
 
 	barrels.clear();
 	ghosts.clear();
@@ -224,7 +227,8 @@ void GameManager::handleMarioDeath() {
 		mario->decreaseLife();
 
 	mario->reset();
-	board.reset(mario->marioLifePoints());
+	board.reset();
+	legend->drawToConsole();
 	resetEnemies();
 
 	delete uncollectedHammer;
@@ -232,7 +236,7 @@ void GameManager::handleMarioDeath() {
 	initializeHammer(board.getLevel());
 
 	clearScr();
-	board.print(isColor);
+	board.print(isColor, *legend);
 }
 
 bool GameManager::checkWinCondition() const {
@@ -255,7 +259,7 @@ void GameManager::startNewGame() {
 	if (mario != nullptr) {
 		mario->restoreLives();
 		mario->reset();
-		board.reset(mario->marioLifePoints());
+		board.reset();
 	}
 }
 
@@ -266,6 +270,9 @@ void GameManager::setupNewLevel() {
 	initializeHammer(board.getLevel());
 
 	readGhosts(board.getLevel());
+
+	score = MAX_INIT_SCORE;
+	legend = new Legend(board.getLevel().getLegendPositionX(), board.getLevel().getLegendPositionY(), mario->getMarioLifeRef(), score, isColor);
 }
 
 void GameManager::donkeyKongThrowsNewBarrel() {

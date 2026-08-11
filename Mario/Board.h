@@ -18,8 +18,8 @@ public:
 	static constexpr const char* TILES_COLOR = PINK;
 
 	// Board state
-	void reset(unsigned int marioLife);
-	void print(bool isColor) const;
+	void reset();
+	void print(bool isColor, const Legend& legend) const;
 
 	// Edge case handling
 	bool isWithinBounds(int x, int y) const { return (GameManager::MIN_X <= x && x < GameManager::MAX_X && GameManager::MIN_Y <= y && y < GameManager::MAX_Y); }

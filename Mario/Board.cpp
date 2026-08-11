@@ -4,20 +4,17 @@
 #include "Pauline.h"
 #include "Hammer.h"
 #include "HelperFunc.h"
+#include "Legend.h"
 #include "Tiles.h"
 
 using namespace std;
 
-void Board::reset(unsigned int marioLife) {
+void Board::reset() {
 	gameBoard = currentOriginalLevel->getOriginalLevel();
-    gotoxy(getLevel().getLegendPositionX(), getLevel().getLegendPositionY());
-    std::string lifeString = "Lives: " + std::to_string(marioLife);
-    for (int i = 0; i < lifeString.size(); i++)
-	    setBoardChar(getLevel().getLegendPositionX() + i, getLevel().getLegendPositionY(), lifeString[i]);
 }
 
 // This function prints the current state of the board
-void Board::print(bool isColor) const {
+void Board::print(bool isColor, const Legend& legend) const {
     gotoxy(0, 0);
     size_t currentIndex = 0;
     size_t totalLines = gameBoard.size();
@@ -46,6 +43,8 @@ void Board::print(bool isColor) const {
         if (++currentIndex < totalLines)
             std::cout << endl;
     }
+
+    legend.drawToConsole();
 }
 
 char Board::getBoardChar(int x, int y) const {

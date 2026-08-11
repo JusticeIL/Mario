@@ -16,10 +16,13 @@ class Board;
 class DonkeyKong;
 class Mario;
 class Pauline;
+class Legend;
 
 enum class Difficulty { Easy, Hard };
 
 class GameManager {
+    // Constants
+    static constexpr unsigned int MAX_INIT_SCORE = 10000;
 
     // Data Members
     bool firstPrint;
@@ -27,6 +30,7 @@ class GameManager {
     bool paused;
     bool& isColor;
     int ticks;
+    unsigned int score;
 
     // References to game objects
     ScreenLoader screenLoader;
@@ -35,6 +39,7 @@ class GameManager {
     Pauline* pauline;
     DonkeyKong* donkeyKong;
     Hammer* uncollectedHammer;
+    Legend* legend;
     std::list<Barrel> barrels;
     std::vector<std::unique_ptr<Ghost>> ghosts;
     std::list<Level*> levels;
@@ -89,10 +94,12 @@ public:
         pauline = nullptr;
         donkeyKong = nullptr;
         uncollectedHammer = nullptr;
+    	legend = nullptr;
         firstPrint = false;
         gameStart = false;
         paused = false;
         ticks = 0;
+        score = MAX_INIT_SCORE;
     }
 
 	~GameManager(); // Destructor

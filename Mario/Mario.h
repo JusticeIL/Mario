@@ -22,6 +22,7 @@ class Mario : public Character {
 	static constexpr const char* MARIO_COLOR = MARIO_PEACH;
 	static constexpr int MAX_JUMP_HEIGHT = 2;
 	static constexpr int MAX_FALL_COUNTER = 5;
+	static constexpr unsigned int INIT_LIFE = 3;
 
 	// Mario's position and movement
 	int startPosX;
@@ -46,7 +47,7 @@ class Mario : public Character {
 public:
 	Mario(int x, int y, Board& b, bool& isColor) : Character(x, y, MARIO_ICON, MARIO_COLOR, b, isColor),
 		startPosX(x), startPosY(y), pressedKey(Key::Stay),
-		life(3),
+		life(INIT_LIFE),
 		jumpCounter(0), fallCounter(0), isOnGround(true), canJump(true), jumping(false), onLadder(false), falling(false),
 		hammer(nullptr)	{
 		prevPosX = x;
@@ -82,8 +83,9 @@ public:
 
 	// Life management
 	unsigned int marioLifePoints() const { return life; }
+	const unsigned int& getMarioLifeRef() const { return life; }
 	void decreaseLife() { --life; }
-	void restoreLives() { life = 3; }
+	void restoreLives() { life = INIT_LIFE; }
 
 	// Hammer management
 	void tryPickUpHammer(Hammer*& uncollectedHammer);
