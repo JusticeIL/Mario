@@ -42,6 +42,7 @@ Level* ScreenLoader::TryLoadLevel(const std::string fileName) {
     unsigned int legendCount = 0;
     bool hasTile = false;
     bool hasWall = false;
+    bool hasLadder = false;
 
 	point marioSpawn(-1, -1);
 	point paulineSpawn(-1, -1);
@@ -85,6 +86,9 @@ Level* ScreenLoader::TryLoadLevel(const std::string fileName) {
 
             if (line[i] == Board::WALL) // Found at least one wall
                 hasWall = true;
+
+            if (line[i] == Board::LADDER) // Found at least one ladder
+                hasLadder = true;
 
             if (line[i] == BigGhost::BIG_GHOST_ICON) 
                 ghostsSpawns.emplace_back(static_cast<int>(i), static_cast<int>(row));
@@ -150,7 +154,10 @@ Level* ScreenLoader::TryLoadLevel(const std::string fileName) {
         if (!hasWall)
 	        errorString += std::string("Error: No wall detected.") + "\n";
 
-        errorString.pop_back();
+        if (!hasLadder)
+            errorString += std::string("Error: No ladder detected.") + "\n";
+
+        errorString.pop_back(); // Remove last new line character
         throw std::invalid_argument(errorString);
     }
 

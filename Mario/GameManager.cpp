@@ -25,7 +25,6 @@ GameManager::~GameManager() { // Destructor
 
 // This function initiates the gameplay, manages the snake movement, collision checks, and apple interactions
 GameManager::GameResult GameManager::playGame() {
-	static int ticks = 0;
 	board.print(isColor, *legend);
 
 	while (true) {
@@ -56,6 +55,14 @@ GameManager::GameResult GameManager::playGame() {
 		for (auto& ghost : ghosts)
 			ghost->updateIfHitMario(mario->getMarioX(), mario->getMarioY());
 
+		donkeyKong->updateIfHitMario(mario->getMarioX(), mario->getMarioY());
+
+		// Easter egg
+		if (mario->isJumping() && legend != nullptr && legend->isScoreCoordinate(mario->getMarioX(), mario->getMarioY() - 1)) {
+			mario->bumpHead();
+			triggerLegendBump();
+		}
+
 		mario->move();
 		mario->tryPickUpHammer(uncollectedHammer);
 
@@ -68,13 +75,17 @@ GameManager::GameResult GameManager::playGame() {
 
 				// 1. Check Barrels
 				for (auto& barrel : barrels)
-					if (barrel.getX() == smashX && barrel.getY() == smashY) 
+					if (!barrel.amIDead() && barrel.getX() == smashX && barrel.getY() == smashY) { // If barrel is dead we don't want to grant additional 10 points
 						barrel.killed();
+						addScore(10);
+					}
 
 				// 2. Check Ghosts
 				for (auto& ghost : ghosts) 
-					if (ghost->getX() == smashX && ghost->getY() == smashY)
+					if (!ghost->amIDead() && ghost->getX() == smashX && ghost->getY() == smashY) { // If ghost is dead we don't want to grant additional 10 points
 						ghost->killed();
+						addScore(10);
+					}
 			}
 		}
 
@@ -102,8 +113,9 @@ GameManager::GameResult GameManager::playGame() {
 		if (mario->marioLifePoints() <= 0)
 			return GameResult::Lost;
 		
-		Sleep(difficultyLevel == Difficulty::Hard ? 50 : 150);
+		Sleep(refreshRateMs);
 		ticks++;
+		manageScore();
 	}
 }
 
@@ -162,10 +174,40 @@ void GameManager::clearAllEntities() {
 	ghosts.clear();
 }
 
+void GameManager::manageScore() {
+	int tickThreshold = static_cast<int>(refreshRateMs * -0.35 + 57.5);
+	if (tickThreshold < 1) // Case: refreshRateMs is too slow to calculate a proper threshold
+		tickThreshold = 1;
+
+	if (ticks > 0 && ticks % tickThreshold == 0 && score > 0) {
+		score--;
+		legend->drawToConsole(); // Update UI instantly
+	}
+}
+
+void GameManager::addScore(int points) {
+	score += points;
+	legend->drawToConsole(); // Update UI instantly
+}
+
+void GameManager::triggerLegendBump() {
+	// 1. Reward points
+	score += 10;
+
+	// 2. Extra Life Drop (OCCASIONAL)
+	if (score % 7 == 0) {
+		// TODO: Extra Life dropped here
+	}
+
+	// 3. Color Bump Flash Effect
+	legend->flashYellow();
+}
+
 void GameManager::resetEnemies() {
 	barrels.clear();
 	ghosts.clear();
 	readGhosts(board.getLevel());
+	donkeyKong->reset();
 }
 
 void GameManager::readGhosts(const Level& level) {
@@ -246,6 +288,8 @@ bool GameManager::checkWinCondition() const {
 void GameManager::startNewGame() {
 	if (levels.empty()) // Case: no levels are loaded at all
 		return;
+
+	ticks = 0;
 
 	clearAllEntities();
 

@@ -31,6 +31,7 @@ class GameManager {
     bool& isColor;
     int ticks;
     unsigned int score;
+    unsigned int refreshRateMs;
 
     // References to game objects
     ScreenLoader screenLoader;
@@ -55,6 +56,11 @@ class GameManager {
     // Game State Management
     const Difficulty& difficultyLevel;
     std::unordered_map<std::string, std::string> error_log;
+
+    // Score Management
+    void manageScore();
+    void addScore(int points);
+    void triggerLegendBump();
     
     // Enemies
     void resetEnemies();
@@ -100,6 +106,7 @@ public:
         paused = false;
         ticks = 0;
         score = MAX_INIT_SCORE;
+        refreshRateMs = (difficultyLevel == Difficulty::Hard) ? 50 : 150;
     }
 
 	~GameManager(); // Destructor
@@ -113,6 +120,7 @@ public:
     // Game Flow & State Management
     void setupNewLevel();
     void startNewGame();
+    bool hasLevels() const { return !levels.empty(); }
     enum class GameResult { InProgress, Won, Lost, Paused, QuitToMenu };
     GameResult playGame();
     void loadAllScreens();
@@ -120,6 +128,7 @@ public:
     // Error handling
     const std::unordered_map<std::string, std::string>& getErrorLog() const { return error_log; }
     
-    // Setter
+    // Setters
     void setColor(bool color) { isColor = color; }
+    void setDelayTimer(unsigned int ms) { refreshRateMs = ms; }
 };

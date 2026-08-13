@@ -7,6 +7,7 @@
 #include "SmallGhost.h"
 #include "BigGhost.h"
 #include "DonkeyKong.h"
+#include "Legend.h"
 
 void Mario::setPressedKey(char key) {
 	canJump = true;
@@ -95,7 +96,9 @@ void Mario::updateState() {
 	bool wasOnLadder = onLadder;
 
 	// 1. Update environment & gravity
-	if (chBelow == Board::EMPTY || chBelow == Hammer::HAMMER_ICON || chBelow == Pauline::PAULINE_ICON) { // Case: Mario is falling or jumping
+	if (chBelow == Board::EMPTY || chBelow == Hammer::HAMMER_ICON || chBelow == Pauline::PAULINE_ICON ||
+		chBelow == SmallGhost::SMALL_GHOST_ICON || chBelow == BigGhost::BIG_GHOST_ICON ||
+		chBelow == Barrel::BARREL_ICON || chBelow == DonkeyKong::DONKEY_KONG_ICON) { // Case: Mario is falling or jumping
 		isOnGround = false;
 		onLadder = false;
 		if (!jumping) 
@@ -267,9 +270,11 @@ void Mario::fall() {
 	int nextPosY = y + currDirY; // Direction in y axis
 
 	if (board.isWithinBounds(nextPosX, nextPosY)) {
-		char chBelow = board.getBoardChar(nextPosX, nextPosY); //Get char below mario
+		char chBelow = board.getBoardChar(nextPosX, nextPosY);
 
-		if (chBelow == Board::EMPTY || chBelow == Hammer::HAMMER_ICON || chBelow == Pauline::PAULINE_ICON) { // On air
+		if (chBelow == Board::EMPTY || chBelow == Hammer::HAMMER_ICON || chBelow == Pauline::PAULINE_ICON ||
+			chBelow == SmallGhost::SMALL_GHOST_ICON || chBelow == BigGhost::BIG_GHOST_ICON ||
+			chBelow == Barrel::BARREL_ICON || chBelow == DonkeyKong::DONKEY_KONG_ICON) { // On air
 			y += currDirY;
 			x += currDirX;
 			fallCounter++;

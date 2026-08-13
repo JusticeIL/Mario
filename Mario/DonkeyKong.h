@@ -18,4 +18,5 @@ public:
 	static constexpr const char* DONKEYKONG_COLOR = BRIGHT_RED;
 
 	Barrel* createBarrel() const { return barrelFactory.spawnBarrel(); }
+	void reset() { isEnemyHitMario = false; }
 };

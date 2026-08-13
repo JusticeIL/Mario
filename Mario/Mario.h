@@ -2,8 +2,9 @@
 #include "Character.h"
 #include "Hammer.h"
 
-// Forward declaration
+// Forward declarations
 class Board;
+class Legend;
 
 // Define available keys here:
 enum class Key : char {
@@ -79,7 +80,9 @@ public:
 
 	// Jumping & Falling
 	void jump();
+	bool isJumping() const { return jumping; }
 	void fall();
+	void bumpHead() { jumping = false; falling = true; jumpCounter = 0;	}
 
 	// Life management
 	unsigned int marioLifePoints() const { return life; }

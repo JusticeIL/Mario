@@ -10,7 +10,7 @@
 // This function manages the main game loop, handles transitions between different game states, and coordinates user inputs and game actions
 void Menu::run() {
 
-	gameManager.loadAllScreens(); // TODO: have the game to handle errors through the error log screen
+	gameManager.loadAllScreens();
 
 	while (state != GameState::Exit) { // main menu loop runs as long as ESC key wasn't pressed
 		if (state == GameState::MainMenu) {
@@ -18,23 +18,43 @@ void Menu::run() {
 			menuChar = handleMenu();
 			switch (menuChar) {
 			case PLAY_CH: // Start game
+				if (!gameManager.hasLevels()) {
+					clearScr();
+					gotoxy(10, 10);
+					std::cout << "Error: No valid level files found to start the game.\n";
+					gotoxy(10, 11);
+					std::cout << "Please verify your .screen files are in the working directory.\n";
+					gotoxy(10, 13);
+					std::cout << "Press 'ESC' key to return to the main menu...";
+
+					bool escChPressed = false;
+					while (!escChPressed) {
+						if (_kbhit() && _getch() == ESC_CH)
+							escChPressed = true;
+
+						Sleep(5);
+					}
+
+					ResetMenu();
+					resetAllArrows();
+					firstPrint = true;
+					break;
+				}
+
 				gameReset();
 				state = GameState::Playing;
-				menuChar = '\0';
 				ResetMenu();
 				resetAllArrows();
 				firstPrint = true;
 				break;
 			case INSTRUCTIONS_CH: // Instructions
 				state = GameState::Instructions;
-				menuChar = '\0';
 				ResetMenu();
 				resetAllArrows();
 				firstPrint = true;
 				break;
 			case OPTIONS_CH: // Options
 				state = GameState::Options;
-				menuChar = '\0';
 				ResetMenu();
 				resetAllArrows();
 				firstPrint = true;
@@ -169,6 +189,7 @@ void Menu::handleState() {
 					std::cout << std::string(10, ' '); // Clear message
 					gotoxy(DIFFICULTY_POS.x, DIFFICULTY_POS.y);
 					std::cout << (difficultyLevel == Difficulty::Easy ? "Easy" : "Hard");
+					gameManager.setDelayTimer((difficultyLevel == Difficulty::Hard) ? 50 : 150);
 					printOKInGreen();
 					messageOnScreen = true;
 					messageTimestamp = GetTickCount();
