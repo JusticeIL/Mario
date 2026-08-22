@@ -7,6 +7,7 @@
 #include "SmallGhost.h"
 #include "Pauline.h"
 #include "DonkeyKong.h"
+#include "ExtraLife.h"
 #include "Hammer.h"
 #include "Tiles.h"
 
@@ -23,6 +24,8 @@ std::list<std::string> ScreenLoader::getScreenFileNames() {
         if (isFileNameValid(filename))
         	FilesFromFolder.push_back(filename);
     }
+
+    FilesFromFolder.sort();
 
     return FilesFromFolder;
 }
@@ -96,8 +99,10 @@ Level* ScreenLoader::TryLoadLevel(const std::string fileName) {
             if (line[i] == SmallGhost::SMALL_GHOST_ICON)
                 ghostsSpawns.emplace_back(static_cast<int>(i), static_cast<int>(row));
 
-            /* TODO: if (line[i] == ExtraLife::EXTRA_LIFE_ICON)
-                extraLifeSpawns.emplace_back(static_cast<int>(i), static_cast<int>(row)); */
+            if (line[i] == ExtraLife::EXTRA_LIFE_ICON) {
+                extraLifeSpawns.emplace_back(static_cast<int>(i), static_cast<int>(row));
+                line[i] = Board::EMPTY;
+            }
         }
 
         std::string padded_line = line;

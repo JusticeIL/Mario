@@ -34,6 +34,8 @@ void Board::print(bool isColor, const Legend& legend) const {
 					std::cout << Pauline::PAULINE_COLOR << ch << RESET;
                 else if (ch == Hammer::HAMMER_ICON)
 					std::cout << Hammer::HAMMER_COLOR << ch << RESET;
+                else if (ch == ExtraLife::EXTRA_LIFE_ICON)
+					std::cout << ExtraLife::EXTRA_LIFE_COLOR << ch << RESET;
                 else
                     std::cout << ch;
             }

@@ -88,6 +88,7 @@ public:
 	unsigned int marioLifePoints() const { return life; }
 	const unsigned int& getMarioLifeRef() const { return life; }
 	void decreaseLife() { --life; }
+	void pickUpLife();
 	void restoreLives() { life = INIT_LIFE; }
 
 	// Hammer management

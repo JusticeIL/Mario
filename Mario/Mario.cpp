@@ -201,6 +201,8 @@ bool Mario::isValidToMove() {
 		return true;
 	case Hammer::HAMMER_ICON:
 		return true;
+	case ExtraLife::EXTRA_LIFE_ICON:
+		return true;
 	case SmallGhost::SMALL_GHOST_ICON:
 		return true;
 	case BigGhost::BIG_GHOST_ICON:
@@ -272,8 +274,8 @@ void Mario::fall() {
 	if (board.isWithinBounds(nextPosX, nextPosY)) {
 		char chBelow = board.getBoardChar(nextPosX, nextPosY);
 
-		if (chBelow == Board::EMPTY || chBelow == Hammer::HAMMER_ICON || chBelow == Pauline::PAULINE_ICON ||
-			chBelow == SmallGhost::SMALL_GHOST_ICON || chBelow == BigGhost::BIG_GHOST_ICON ||
+		if (chBelow == Board::EMPTY || chBelow == Hammer::HAMMER_ICON ||chBelow == ExtraLife::EXTRA_LIFE_ICON ||
+			chBelow == Pauline::PAULINE_ICON || chBelow == SmallGhost::SMALL_GHOST_ICON || chBelow == BigGhost::BIG_GHOST_ICON ||
 			chBelow == Barrel::BARREL_ICON || chBelow == DonkeyKong::DONKEY_KONG_ICON) { // On air
 			y += currDirY;
 			x += currDirX;
@@ -307,7 +309,7 @@ void Mario::jump() {
 			char nextCh = board.getBoardChar(nextPosX, nextPosY);
 
 			if (nextCh == Board::EMPTY || nextCh == Board::LADDER ||
-				nextCh == Hammer::HAMMER_ICON || nextCh == Pauline::PAULINE_ICON) {
+				nextCh == Hammer::HAMMER_ICON || nextCh == ExtraLife::EXTRA_LIFE_ICON || nextCh == Pauline::PAULINE_ICON) {
 				x = nextPosX;
 				y = nextPosY;
 				++jumpCounter;
@@ -364,18 +366,21 @@ void Mario::reset() {
 	isDead = false;
 }
 
+void Mario::pickUpLife() {
+	++life;
+	prevCh = Board::EMPTY;
+}
+
 void Mario::tryPickUpHammer(Hammer*& uncollectedHammer) {
 	if (uncollectedHammer != nullptr) {
 		if (uncollectedHammer->getX() == x && uncollectedHammer->getY() == y) {
-			if (!hasHammer()) {
+			if (!hasHammer()) 
 				pickUpHammer(uncollectedHammer);
-				uncollectedHammer = nullptr; // Remove the hammer from the board
-			}
 			else {
 				delete uncollectedHammer;
-				uncollectedHammer = nullptr;
 				prevCh = Board::EMPTY; // Clear Mario's footprint so he doesn't leave a ghost hammer behind
 			}
+			uncollectedHammer = nullptr; // Remove the hammer from the board
 		}
 	}
 }

@@ -47,6 +47,37 @@ void Menu::run() {
 				resetAllArrows();
 				firstPrint = true;
 				break;
+			case SPECIFIC_LEVEL_CH:
+				if (!gameManager.hasLevels()) {
+					clearScr();
+					gotoxy(10, 10);
+					std::cout << "Error: No valid level files found to start the game.\n";
+					gotoxy(10, 11);
+					std::cout << "Please verify your .screen files are in the working directory.\n";
+					gotoxy(10, 13);
+					std::cout << "Press 'ESC' key to return to the main menu...";
+
+					bool escChPressed = false;
+					while (!escChPressed) {
+						if (_kbhit() && _getch() == ESC_CH)
+							escChPressed = true;
+
+						Sleep(5);
+					}
+
+					ResetMenu();
+					resetAllArrows();
+					firstPrint = true;
+					break;
+				}
+
+				state = GameState::SelectLevel;
+				menuChar = '\0';
+				ResetMenu();
+				resetAllArrows();
+				firstPrint = true;
+				break;
+				
 			case INSTRUCTIONS_CH: // Instructions
 				state = GameState::Instructions;
 				ResetMenu();
@@ -89,7 +120,7 @@ void Menu::run() {
 			gameOverLogic();
 		else if (state == GameState::GameWon)
 			gameWonLogic();
-		else if (state == GameState::Instructions || state == GameState::Options) { // Case: menu screens
+		else if (state == GameState::SelectLevel || state == GameState::Instructions || state == GameState::Options) { // Case: menu screens
 			printScreens();
 			handleState();
 		}
@@ -99,6 +130,7 @@ void Menu::run() {
 void Menu::printScreens() {
 
 	switch (state) {
+	case GameState::SelectLevel:
 	case GameState::Instructions:
 	case GameState::Options:
 		menuChar = '\0';
@@ -111,10 +143,12 @@ void Menu::printScreens() {
 	gotoxy(0, 0);
 
 	switch (state)	{
+	case GameState::SelectLevel:
+		printSelectLevelScreen();
+		break;
 	case GameState::Instructions:
 		printInstructionsScreen();
 		break;
-
 	case GameState::Options:
 		printOptionsScreen();
 		// Color mode printing
@@ -142,15 +176,18 @@ void Menu::handleState() {
 	static DWORD messageTimestamp = 0;
 	static bool messageOnScreen = false;
 
-	while (state == GameState::Instructions || state == GameState::Options) {
+	while (state == GameState::SelectLevel || state == GameState::Instructions || state == GameState::Options) {
 		if (_kbhit()) {
 			char pressedKey = _getch();
 			pressedKey = tolower(pressedKey);
 			menuChar = pressedKey;
 
 			switch (state) {
+			case GameState::SelectLevel:
+				handleSelectLevelInput(pressedKey);
+				break;
 			case GameState::Instructions:
-				if (pressedKey == exitCh) { // Case: returning to main menu
+				if (pressedKey == EXIT_CH) { // Case: returning to main menu
 					ResetMenu(); // Resetting menu variables
 					firstPrint = true;
 					clearScr(); // Clear the screen before returning to the menu
@@ -194,7 +231,7 @@ void Menu::handleState() {
 					messageOnScreen = true;
 					messageTimestamp = GetTickCount();
 				}
-				else if (pressedKey == exitCh) {// Case: returning to main menu
+				else if (pressedKey == EXIT_CH) {// Case: returning to main menu
 					ResetMenu(); // Resetting menu variables
 					firstPrint = true;
 					clearScr(); // Clear the screen before returning to the menu
@@ -342,7 +379,7 @@ void Menu::handleConsoleLogInput(size_t& currentErrorPage) {
 	const auto& errorLog = gameManager.getErrorLog();
 	char userChoice = '\0';
 
-	while (userChoice != 'q' && userChoice != 'e' && userChoice != exitCh && userChoice != ESC_CH) {
+	while (userChoice != 'q' && userChoice != 'e' && userChoice != EXIT_CH && userChoice != ESC_CH) {
 		if (_kbhit()) {
 			userChoice = tolower(_getch());
 
@@ -360,7 +397,7 @@ void Menu::handleConsoleLogInput(size_t& currentErrorPage) {
 				else 
 					userChoice = '\0';
 			}
-			else if (userChoice == exitCh || userChoice == ESC_CH) 
+			else if (userChoice == EXIT_CH || userChoice == ESC_CH) 
 				state = GameState::Options;
 			else // Case: Unfamiliar key pressed
 				userChoice = '\0';
@@ -378,6 +415,9 @@ void Menu::MoveArrow(char numKey) const {
     case PLAY_CH:
         gotoxy(PLAY.x, PLAY.y);
         break;
+	case SPECIFIC_LEVEL_CH:
+		gotoxy(SPECIFIC_LEVEL.x, SPECIFIC_LEVEL.y);
+		break;
     case OPTIONS_CH:
         gotoxy(OPTIONS.x, OPTIONS.y);
         break;
@@ -388,6 +428,7 @@ void Menu::MoveArrow(char numKey) const {
         gotoxy(EXIT.x, EXIT.y);
         break;
     }
+
     std::cout << arrow;
 }
 
@@ -398,6 +439,65 @@ void Menu::resetAllArrows() const {
         gotoxy(positions[i].x, positions[i].y);
         std::cout << ' ';
     }
+}
+
+void Menu::handleSelectLevelInput(char pressedKey) {
+	int totalLevels = static_cast<int>(gameManager.getLevels().size());
+	char toLowerPressedKey = static_cast<char>(tolower(pressedKey));
+	int oldIndex = selectedLevelIndex;
+	bool arrowMoved = false;
+
+	if (toLowerPressedKey == static_cast<char>(Key::Up)) { // Case: Mario Up
+		--selectedLevelIndex;
+		if (selectedLevelIndex < 0) // Case: Go to end
+			selectedLevelIndex = totalLevels - 1;
+
+		arrowMoved = true;
+	}
+	else if (toLowerPressedKey == static_cast<char>(Key::Down)) { // Case: Mario Down
+		++selectedLevelIndex;
+		if (selectedLevelIndex >= totalLevels) // Case: Go to start
+			selectedLevelIndex = 0;
+
+		arrowMoved = true;
+	}
+	else if (toLowerPressedKey >= '1' && toLowerPressedKey <= '0' + totalLevels) { // Case: Direct number choice
+		selectedLevelIndex = toLowerPressedKey - '1'; // Cast char to index
+		arrowMoved = true;
+	}
+	else if (toLowerPressedKey == '\r' || toLowerPressedKey == '\n') { // Case: Enter to confirm choice
+		auto levelIterator = gameManager.getLevels().begin();
+		std::advance(levelIterator, selectedLevelIndex);
+
+		gameManager.startSpecificLevel((*levelIterator)->getFilename());
+
+		state = GameState::Playing;
+		menuChar = '\0';
+		ResetMenu();
+		resetAllArrows();
+		firstPrint = true;
+		clearScr();
+		return;
+	}
+	else if (toLowerPressedKey == ESC_CH) { // Case: ESC to go back to main menu
+		ResetMenu();
+		firstPrint = true;
+		clearScr();
+		state = GameState::MainMenu;
+		resetAllArrows();
+		return;
+	}
+
+	if (arrowMoved && oldIndex != selectedLevelIndex) // Case: Reprint the screen only if the arrow position changed
+		updateSelectLevelArrow(oldIndex, selectedLevelIndex);
+}
+
+void Menu::updateSelectLevelArrow(int oldIndex, int newIndex) const {
+	gotoxy(5, 5 + (oldIndex * 2)); // 1. Erase the old arrow
+	std::cout << ' ';
+
+	gotoxy(5, 5 + (newIndex * 2)); // 2. Draw the new arrow
+	std::cout << arrow;
 }
 
 // This function prints "OK!" in green with a blinking effect
@@ -485,4 +585,26 @@ void Menu::playExitSound() const {
 	Sleep(50);
 	Beep(1000, 50);
 	Beep(1200, 50);
+}
+
+void Menu::printSelectLevelScreen() const {
+	gotoxy(0, 0);
+	std::cout << selectLevelScreen;
+
+	int y = 5;
+	int optionNumber = 1;
+	int currentIndex = 0;
+
+	for (const auto& lvl : gameManager.getLevels()) {
+		gotoxy(5, y);
+
+		std::cout << (currentIndex == selectedLevelIndex ? arrow : ' ') << " [" << optionNumber << "] " << lvl->getFilename();
+
+		y += 2;
+		++optionNumber;
+		++currentIndex;
+	}
+
+	gotoxy(5, y + 2);
+	std::cout << "[ESC] Back to Main Menu";
 }

@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include "Barrel.h"
+#include "ExtraLife.h"
 #include "Ghost.h"
 #include "Hammer.h"
 #include "Level.h"
@@ -32,6 +33,7 @@ class GameManager {
     int ticks;
     unsigned int score;
     unsigned int refreshRateMs;
+    bool singleLevelMode;
 
     // References to game objects
     ScreenLoader screenLoader;
@@ -40,6 +42,7 @@ class GameManager {
     Pauline* pauline;
     DonkeyKong* donkeyKong;
     Hammer* uncollectedHammer;
+    std::list<ExtraLife*> uncollectedExtraLives;
     Legend* legend;
     std::list<Barrel> barrels;
     std::vector<std::unique_ptr<Ghost>> ghosts;
@@ -56,6 +59,9 @@ class GameManager {
     // Game State Management
     const Difficulty& difficultyLevel;
     std::unordered_map<std::string, std::string> error_log;
+
+    // Level management
+    void prepareLevelData();
 
     // Score Management
     void manageScore();
@@ -91,6 +97,10 @@ class GameManager {
     // Hammer management
     void initializeHammer(const Level& level);
 
+	// Extra life management
+    void readExtraLives(const Level& level);
+    void tryCollectExtraLives();
+
     // Memory management
     void clearAllEntities();
 
@@ -107,6 +117,7 @@ public:
         ticks = 0;
         score = MAX_INIT_SCORE;
         refreshRateMs = (difficultyLevel == Difficulty::Hard) ? 50 : 150;
+        singleLevelMode = false;
     }
 
 	~GameManager(); // Destructor
@@ -121,6 +132,8 @@ public:
     void setupNewLevel();
     void startNewGame();
     bool hasLevels() const { return !levels.empty(); }
+    const std::list<Level*>& getLevels() const { return levels; }
+    void startSpecificLevel(const std::string& filename);
     enum class GameResult { InProgress, Won, Lost, Paused, QuitToMenu };
     GameResult playGame();
     void loadAllScreens();

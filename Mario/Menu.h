@@ -7,20 +7,22 @@ class Menu {
 
 	// Constants for menu layout and options
 	static constexpr char arrow = '>';
-	static constexpr char gameCh = '1';
-	static constexpr char optionsCh = '2';
-	static constexpr char instructionsCh = '3';
-	static constexpr char exitCh = '9';
+	static constexpr char PLAY_CH = '1';
+    static constexpr char SPECIFIC_LEVEL_CH = '2';
+	static constexpr char OPTIONS_CH = '3';
+	static constexpr char INSTRUCTIONS_CH = '4';
+	static constexpr char EXIT_CH = '9';
 
 	// Struct to define menu option positions
 	struct ScreenPos { int x; int y; }; // Has to be positioned here to maintain the constexpr compiling
 
 	// Positions of menu options
-	static constexpr ScreenPos PLAY = { 7,15 };
-	static constexpr ScreenPos OPTIONS = { 7,17 };
-	static constexpr ScreenPos INSTRUCTIONS = { 7,19 };
-	static constexpr ScreenPos EXIT = { 7,21 };
-	static constexpr ScreenPos positions[] = { PLAY, OPTIONS, INSTRUCTIONS, EXIT };
+	static constexpr ScreenPos PLAY = { 7,14 };
+    static constexpr ScreenPos SPECIFIC_LEVEL = { 7,16 };
+	static constexpr ScreenPos OPTIONS = { 7,18 };
+	static constexpr ScreenPos INSTRUCTIONS = { 7,20 };
+	static constexpr ScreenPos EXIT = { 7,22 };
+	static constexpr ScreenPos positions[] = { PLAY, SPECIFIC_LEVEL, OPTIONS, INSTRUCTIONS, EXIT };
 
     // Positions of menu prints
 	static constexpr ScreenPos COLOR_MODE_POS = { 39, 5 };
@@ -35,10 +37,11 @@ class Menu {
     bool isColor;
     Difficulty difficultyLevel;
     bool firstPrint;
+    int selectedLevelIndex;
 
     // Menu and game state
     GameManager gameManager;
-    enum class GameState { MainMenu, Playing, Instructions, Options, ConsoleLog, Pause, GameOver, GameWon, Exit };
+    enum class GameState { MainMenu, Playing, SelectLevel, Instructions, Options, ConsoleLog, Pause, GameOver, GameWon, Exit };
     GameState state = GameState::MainMenu;
 
     // Menu layout
@@ -58,15 +61,15 @@ class Menu {
         "Q                   |=||===|  |=|  |=| |=|==\\|=| |=|   |=|                    Q\n" // 11
         "Q                   |=|  |=|   |====|  |=| |===| |=======|                    Q\n" // 12
         "Q                                                                             Q\n" // 13
-        "Q                                                                             Q\n" // 14
-        "Q         [1] Start a new Game                                                Q\n" // 15
-        "Q                                                                             Q\n" // 16
-        "Q         [2] Options                                                         Q\n" // 17
-        "Q                                                                             Q\n" // 18
-        "Q         [3] Instructions                                                    Q\n" // 19
-        "Q                                                                             Q\n" // 20
-        "Q         [9] Exit                                                            Q\n" // 21
-        "Q                                      Use numbers and ENTER to navigate      Q\n" // 22
+        "Q         [1] Start a new Game                                                Q\n" // 14
+        "Q                                                                             Q\n" // 15
+        "Q         [2] Specific Level                                                  Q\n" // 16
+        "Q                                                                             Q\n" // 17
+        "Q         [3] Options                                                         Q\n" // 18
+        "Q                                                                             Q\n" // 19
+        "Q         [4] Instructions                                                    Q\n" // 20
+        "Q                                                                             Q\n" // 21
+        "Q         [9] Exit                     Use numbers and ENTER to navigate      Q\n" // 22
         "Q                                                                             Q\n" // 23
         "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"; // 24
 
@@ -226,8 +229,14 @@ class Menu {
         "                                Congratulations!                               \n"
         "                              ON TO THE NEXT STAGE!                              ";
 
+    std::string selectLevelScreen =
+        "Q=============================================================================Q\n"
+        "Q                              Select a Level                                 Q\n"
+        "Q=============================================================================Q\n";
+
     // Menu Display
     void printMainMenu() const { gotoxy(0, 0); std::cout << mainMenu; }
+    void printSelectLevelScreen() const;
     void printInstructionsScreen() const;
     void printOptionsScreen() const { gotoxy(0, 0); std::cout << optionsScreen; }
     void printConsoleLogScreen(size_t currentErrorPage);
@@ -241,6 +250,8 @@ class Menu {
     // Menu Navigation
     void MoveArrow(char numKey) const;
     void resetAllArrows() const;
+    void handleSelectLevelInput(char pressedKey);
+    void updateSelectLevelArrow(int oldIndex, int newIndex) const;
     void ChangeisArrowChoice() { isArrow = true; }
     void ResetMenu() { menuChar = '\0'; chosen = false; }
     void printScreens();
@@ -268,15 +279,12 @@ public:
 		isColor = false;
         firstPrint = true;
         difficultyLevel = Difficulty::Easy;
+		selectedLevelIndex = 0;
     }
 
     // Constants
-    static constexpr char PLAY_CH = '1';
-    static constexpr char OPTIONS_CH = '2';
-    static constexpr char INSTRUCTIONS_CH = '3';
-    static constexpr char EXIT_CH = '9';
     static constexpr char ESC_CH = 27;
-    
+
     // Public entry point
     void run();
 };

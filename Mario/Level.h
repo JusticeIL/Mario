@@ -21,6 +21,7 @@ public:
 		ghostsSpawnPoints(ghostsSpawns), hammerSpawnPoint(hammerSpawn), extraLifeSpawnPoints(extraLifeSpawns) {} // Constructor
 
 	// Getters
+	const std::string& getFilename() const { return filename; }
 	const std::vector<std::string>& getOriginalLevel() const { return level; }
 	int getMarioSpawnX() const { return marioSpawn.first; }
 	int getMarioSpawnY() const { return marioSpawn.second; }

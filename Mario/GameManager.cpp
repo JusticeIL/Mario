@@ -18,6 +18,9 @@ GameManager::~GameManager() { // Destructor
 		levelIterator = levels.erase(levelIterator); // 2. Remove pointer from list and get next iterator
 	}
 
+	for (auto* life : uncollectedExtraLives)
+		delete life;
+
 	delete mario;
 	delete pauline;
 	delete donkeyKong;
@@ -89,10 +92,12 @@ GameManager::GameResult GameManager::playGame() {
 			}
 		}
 
+		tryCollectExtraLives();
+
 		pauline->updateWinCondition(mario->getMarioX(), mario->getMarioY());
 		if (checkWinCondition()) {
 			currentLevel++;
-			if (currentLevel == levels.end())  // Case: They beat the whole game!
+			if (singleLevelMode || currentLevel == levels.end())  // Case: They beat the whole game!
 				return GameResult::Won;
 
 			clearAllEntities();
@@ -101,6 +106,10 @@ GameManager::GameResult GameManager::playGame() {
 			mario->reset();
 			clearScr();
 			board.reset();
+
+			for (auto* life : uncollectedExtraLives)
+				life->drawToBoard();
+
 			board.print(isColor, *legend);
 			ticks++;
 			continue; // Skips the rest of the tick since we just loaded a new level
@@ -157,6 +166,34 @@ void GameManager::initializeHammer(const Level& level) {
 		uncollectedHammer = new Hammer(hammerXPos, hammerYPos, board, isColor);
 }
 
+void GameManager::readExtraLives(const Level& level) {
+	for (const auto& spawn : level.getExtraLifeSpawnPoints()) {
+		ExtraLife* life = new ExtraLife(spawn.first, spawn.second, board, isColor);
+		uncollectedExtraLives.push_back(life);
+		life->drawToBoard();
+	}
+}
+
+void GameManager::tryCollectExtraLives() {
+	bool lifeGained = false;
+	for (auto extraLifeIterator = uncollectedExtraLives.begin(); extraLifeIterator != uncollectedExtraLives.end(); ) {
+		if ((*extraLifeIterator)->checkIfMarioPickedUpLife(mario->getMarioX(), mario->getMarioY())) {
+			mario->pickUpLife();
+
+			delete* extraLifeIterator; // Destructor automatically erases it from the board
+			extraLifeIterator = uncollectedExtraLives.erase(extraLifeIterator);
+
+			lifeGained = true;
+			break; // Only one life can be collected at a board step
+		}
+		else
+			++extraLifeIterator;
+	}
+
+	if (lifeGained)
+		legend->drawToConsole();
+}
+
 void GameManager::clearAllEntities() {
 	delete donkeyKong;
 	donkeyKong = nullptr;
@@ -169,6 +206,10 @@ void GameManager::clearAllEntities() {
 
 	delete legend;
 	legend = nullptr;
+
+	for (auto* life : uncollectedExtraLives)
+		delete life;
+	uncollectedExtraLives.clear();
 
 	barrels.clear();
 	ghosts.clear();
@@ -196,7 +237,15 @@ void GameManager::triggerLegendBump() {
 
 	// 2. Extra Life Drop (OCCASIONAL)
 	if (score % 7 == 0) {
-		// TODO: Extra Life dropped here
+		int rewardX = board.getLevel().getLegendPositionX() - 2;
+		int rewardY = board.getLevel().getLegendPositionY() + 3;
+
+		if (board.isWithinBounds(rewardX, rewardY) && board.getBoardChar(rewardX, rewardY) == Board::EMPTY) {
+			ExtraLife* dynamicLife = new ExtraLife(rewardX, rewardY, board, isColor);
+			dynamicLife->drawToBoard();
+			dynamicLife->drawToConsole();
+			uncollectedExtraLives.push_back(dynamicLife);
+		}
 	}
 
 	// 3. Color Bump Flash Effect
@@ -277,6 +326,9 @@ void GameManager::handleMarioDeath() {
 	uncollectedHammer = nullptr;
 	initializeHammer(board.getLevel());
 
+	for (auto* life : uncollectedExtraLives)
+		life->drawToBoard();
+
 	clearScr();
 	board.print(isColor, *legend);
 }
@@ -289,22 +341,50 @@ void GameManager::startNewGame() {
 	if (levels.empty()) // Case: no levels are loaded at all
 		return;
 
-	ticks = 0;
-
-	clearAllEntities();
+	singleLevelMode = false;
 
 	// Reset progress to the first level
 	currentLevel = levels.begin();
+
+	prepareLevelData();
+}
+
+void GameManager::prepareLevelData() {
+	// 1. Clear out any old state
+	ticks = 0;
+	clearAllEntities();
+
+	// 2. Load the target level
 	board.setLevel(*currentLevel);
 
-	// Setup DK, ghosts, and barrels for the new board
+	// Setup DK, ghosts, barrels, hammer and extra lives for the new board
 	setupNewLevel();
 
+	// 3. Reset Mario and safely redraw
 	if (mario != nullptr) {
 		mario->restoreLives();
 		mario->reset();
 		board.reset();
 	}
+
+	for (auto* life : uncollectedExtraLives)
+		life->drawToBoard();
+}
+
+void GameManager::startSpecificLevel(const std::string& filename) {
+	if (levels.empty()) // Case: no levels are loaded at all
+		return;
+
+	singleLevelMode = true;
+
+	// Find the requested level by name
+	for (auto it = levels.begin(); it != levels.end(); ++it) 
+		if ((*it)->getFilename() == filename) {
+			currentLevel = it;
+			break;
+		}
+
+	prepareLevelData();
 }
 
 void GameManager::setupNewLevel() {
@@ -313,6 +393,7 @@ void GameManager::setupNewLevel() {
 	initializePauline(board.getLevel());
 	initializeHammer(board.getLevel());
 
+	readExtraLives(board.getLevel());
 	readGhosts(board.getLevel());
 
 	score = MAX_INIT_SCORE;
