@@ -37,4 +37,5 @@ public:
 	// Getters
 	int getX() const { return x; }
 	int getY() const { return y; }
+	char getIcon() const { return icon; }
 };

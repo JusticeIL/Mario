@@ -71,7 +71,7 @@ void Hammer::grab() const {
 }
 
 void Hammer::draw(int radius) const {
-	if (hammerPosX[radius] == -1)
+	if (board.isSilent() || hammerPosX[radius] == -1)
 		return;
 
 	gotoxy(hammerPosX[radius], hammerPosY);
@@ -96,6 +96,9 @@ void Hammer::eraseHammerCharsFromBoard(int radius) const {
 }
 
 void Hammer::eraseHammerCharsFromConsole(int radius) const {
+	if (board.isSilent())
+		return;
+
 	gotoxy(hammerPosX[radius], hammerPosY);
 	char charToPrint = prevHammerChars[radius];
 
@@ -110,16 +113,8 @@ void Hammer::eraseHammerCharsFromConsole(int radius) const {
 			charToPrint = Board::EMPTY;
 	}
 	
-	if (isColor) {
-		if (charToPrint == Board::LADDER)
-			std::cout << Board::LADDER_COLOR << charToPrint << RESET;
-		else if (Tiles::isTile(charToPrint))
-			std::cout << Board::TILES_COLOR << charToPrint << RESET;
-		else if (charToPrint == Board::WALL)
-			std::cout << Board::WALL_COLOR << charToPrint << RESET;
-		else
-			std::cout << charToPrint;
-	}
+	if (isColor)
+		Board::printCharWithColor(charToPrint);
 	else
 		std::cout << charToPrint;
 }

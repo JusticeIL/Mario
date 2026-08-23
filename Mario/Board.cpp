@@ -49,6 +49,25 @@ void Board::print(bool isColor, const Legend& legend) const {
     legend.drawToConsole();
 }
 
+void Board::printCharWithColor(char ch) {
+    if (ch == LADDER)
+        std::cout << LADDER_COLOR << ch << RESET;
+    else if (Tiles::isTile(ch))
+        std::cout << TILES_COLOR << ch << RESET;
+    else if (ch == WALL)
+        std::cout << WALL_COLOR << ch << RESET;
+    else if (ch == Barrel::BARREL_ICON)
+        std::cout << Barrel::BARREL_COLOR << ch << RESET;
+    else if (ch == DonkeyKong::DONKEY_KONG_ICON)
+        std::cout << DonkeyKong::DONKEYKONG_COLOR << ch << RESET;
+    else if (ch == Pauline::PAULINE_ICON)
+        std::cout << Pauline::PAULINE_COLOR << ch << RESET;
+    else if (ch == Hammer::HAMMER_ICON)
+        std::cout << Hammer::HAMMER_COLOR << ch << RESET;
+    else
+        std::cout << ch;
+}
+
 char Board::getBoardChar(int x, int y) const {
 	if (!isWithinBounds(x, y)) {
 		if (y >= GameManager::MAX_Y)

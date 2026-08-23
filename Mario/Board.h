@@ -8,6 +8,7 @@ class Board {
 
 	const Level* currentOriginalLevel;
 	std::vector<std::string> gameBoard;
+	bool silentMode = false;
 
 public:
 	static constexpr char LADDER = 'H';
@@ -20,6 +21,7 @@ public:
 	// Board state
 	void reset();
 	void print(bool isColor, const Legend& legend) const;
+	static void printCharWithColor(char ch);
 
 	// Edge case handling
 	bool isWithinBounds(int x, int y) const { return (GameManager::MIN_X <= x && x < GameManager::MAX_X && GameManager::MIN_Y <= y && y < GameManager::MAX_Y); }
@@ -29,4 +31,8 @@ public:
 	void setBoardChar(int x, int y, char ch);
 	Level getLevel() { return *currentOriginalLevel; }
 	void setLevel(const Level* newLevel);
+
+	// Silent handling
+	void setSilent(bool silent) { silentMode = silent; }
+	bool isSilent() const { return silentMode; }
 };

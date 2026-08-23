@@ -37,33 +37,42 @@ void Barrel::create_first_radius_exp() const {
 
 			if (board.isWithinBounds(x + dx, y + dy)) // Ensure board limits
 			{
-				gotoxy(x + dx, y + dy);
+				if (!board.isSilent())
+					gotoxy(x + dx, y + dy);
 
 				if (dx == 0 && dy == -1) {
 					board.setBoardChar(x + dx, y + dy, '|');
-					std::cout << '|'; // Vertical explosion
+					if (!board.isSilent())
+						std::cout << '|'; // Vertical explosion
 				}
 				else if (dy == 0 && std::abs(dx) == 1) {
 					board.setBoardChar(x + dx, y + dy, '-');
-					std::cout << '-'; // Horizontal explosion
+					if (!board.isSilent())
+						std::cout << '-'; // Horizontal explosion
 				}
 				else if ((dx == 1 && dy == -1)) {
 					board.setBoardChar(x + dx, y + dy, '/');
-					std::cout << '/'; // Diagonal explosion
+					if (!board.isSilent())
+						std::cout << '/'; // Diagonal explosion
 				}
 				else if (dx == -1 && dy == -1) {
 					board.setBoardChar(x + dx, y + dy, '\\');
-					std::cout << '\\'; // Diagonal explosion
+					if (!board.isSilent())
+						std::cout << '\\'; // Diagonal explosion
 				}
 			}
 		}
 	}
 
-	Sleep(EXPLOSION_DELAY_MS); // Delay
+	if (!board.isSilent())
+		Sleep(EXPLOSION_DELAY_MS); // Delay
 }
 
 // This function removes the first radius of the explosion effect by erasing explosion characters from the console
 void Barrel::delete_first_radius_exp() const {
+	if (board.isSilent())
+		return;
+
 	for (int dy = -1; dy <= 0; dy++)
 		for (int dx = -1; dx <= 1; dx++) {
 			if (dx == 0 && dy == 0) // Skip the barrel's position
@@ -105,7 +114,9 @@ void Barrel::create_second_radius_exp() const {
 					}
 				}
 		}
-	Sleep(EXPLOSION_DELAY_MS); // Delay
+
+	if (!board.isSilent())
+		Sleep(EXPLOSION_DELAY_MS); // Delay
 }
 
 // This function restores the characters saved before the explosion effect in the specified area of the board and on screen
@@ -122,22 +133,16 @@ void Barrel::restorePrevChars() const {
 			// Ensure indexes of prevChars are inside board bounds
 			if (0 <= indexY && indexY < 3 && 0 <= indexX && indexX < 5)
 				if (board.isWithinBounds(x + dx, y + dy)) { // Ensure board limits
-					gotoxy(x + dx, y + dy);
 					char charToPrint = prevChars[indexY][indexX];
 					board.setBoardChar(x + dx, y + dy, charToPrint);
 					
-					if (isColor) {
-						if (charToPrint == Board::LADDER)
-							std::cout << Board::LADDER_COLOR << charToPrint << RESET;
-						else if (Tiles::isTile(charToPrint))
-							std::cout << Board::TILES_COLOR << charToPrint << RESET;
-						else if (charToPrint == Board::WALL)
-							std::cout << Board::WALL_COLOR << charToPrint << RESET;
+					if (!board.isSilent()) {
+						gotoxy(x + dx, y + dy);
+						if (isColor)
+							Board::printCharWithColor(charToPrint);
 						else
 							std::cout << charToPrint;
 					}
-					else
-						std::cout << charToPrint;
 				}
 		}
 }

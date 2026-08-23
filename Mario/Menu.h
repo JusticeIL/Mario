@@ -33,7 +33,6 @@ class Menu {
     bool chosen;
 	char menuChar;
 	bool isArrow;
-	bool MenuChoice;
     bool isColor;
     Difficulty difficultyLevel;
     bool firstPrint;
@@ -47,136 +46,136 @@ class Menu {
     // Menu layout
     std::string mainMenu =
         //01234567890123456789012345678901234567890123456789012345678901234567890123456789
-        "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ\n" // 0
-        "Q                                                                             Q\n" // 1
-        "Q         |=====\\     |====|   |=\\   |=| |=|  |=| |======| |=|   |=|          Q\n" // 2
-        "Q         |=|   ==|  |=|  |=|  |==\\  |=| |=||===| |=|       |=| |=|           Q\n" // 3
-        "Q         |=|   ==|  |=|  |=|  |=|=\\ |=| |===|    |======|   |===|            Q\n" // 4
-        "Q         |=|   ==|  |=|  |=|  |=|==\\|=| |=||===| |=|         |=|             Q\n" // 5
-        "Q         |======|    |====|   |=| |===| |=|  |=| |======|    |=|             Q\n" // 6
-        "Q                                                                             Q\n" // 7
-        "Q                   |=|  |=|   |====|  |=\\   |=| |=======|                    Q\n" // 8
-        "Q                   |=||===|  |=|  |=| |==\\  |=| |=|                          Q\n" // 9
-        "Q                   |===|     |=|  |=| |=|=\\ |=| |=| |===|                    Q\n" // 10
-        "Q                   |=||===|  |=|  |=| |=|==\\|=| |=|   |=|                    Q\n" // 11
-        "Q                   |=|  |=|   |====|  |=| |===| |=======|                    Q\n" // 12
-        "Q                                                                             Q\n" // 13
-        "Q         [1] Start a new Game                                                Q\n" // 14
-        "Q                                                                             Q\n" // 15
-        "Q         [2] Specific Level                                                  Q\n" // 16
-        "Q                                                                             Q\n" // 17
-        "Q         [3] Options                                                         Q\n" // 18
-        "Q                                                                             Q\n" // 19
-        "Q         [4] Instructions                                                    Q\n" // 20
-        "Q                                                                             Q\n" // 21
-        "Q         [9] Exit                     Use numbers and ENTER to navigate      Q\n" // 22
-        "Q                                                                             Q\n" // 23
+        "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ\n" // 0
+        "Q                                                                              Q\n" // 1
+        "Q          |=====\\     |====|   |=\\   |=| |=|  |=| |======| |=|   |=|          Q\n" // 2
+        "Q          |=|   ==|  |=|  |=|  |==\\  |=| |=||===| |=|       |=| |=|           Q\n" // 3
+        "Q          |=|   ==|  |=|  |=|  |=|=\\ |=| |===|    |======|   |===|            Q\n" // 4
+        "Q          |=|   ==|  |=|  |=|  |=|==\\|=| |=||===| |=|         |=|             Q\n" // 5
+        "Q          |======|    |====|   |=| |===| |=|  |=| |======|    |=|             Q\n" // 6
+        "Q                                                                              Q\n" // 7
+        "Q                    |=|  |=|   |====|  |=\\   |=| |=======|                    Q\n" // 8
+        "Q                    |=||===|  |=|  |=| |==\\  |=| |=|                          Q\n" // 9
+        "Q                    |===|     |=|  |=| |=|=\\ |=| |=| |===|                    Q\n" // 10
+        "Q                    |=||===|  |=|  |=| |=|==\\|=| |=|   |=|                    Q\n" // 11
+        "Q                    |=|  |=|   |====|  |=| |===| |=======|                    Q\n" // 12
+        "Q                                                                              Q\n" // 13
+        "Q         [1] Start a new Game                                                 Q\n" // 14
+        "Q                                                                              Q\n" // 15
+        "Q         [2] Specific Level                                                   Q\n" // 16
+        "Q                                                                              Q\n" // 17
+        "Q         [3] Options                                                          Q\n" // 18
+        "Q                                                                              Q\n" // 19
+        "Q         [4] Instructions                                                     Q\n" // 20
+        "Q                                                                              Q\n" // 21
+        "Q         [9] Exit                     Use numbers and ENTER to navigate       Q\n" // 22
+        "Q                                                                              Q\n" // 23
         "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"; // 24
 
     // Screens
     std::string instructionsScreen =
-        "Q=============================================================================Q\n"
-        "Q                                                                             Q\n"
-        "Q                                 Instructions:                               Q\n"
-        "Q                                 ____________                                Q\n"
-        "Q                                                                             Q\n"
-        "Q              Use ' ' or ' ' to move left or right accordingly               Q\n"
-        "Q                                                                             Q\n"
-        "Q                     Use ' ' to jump or go up the ladder                     Q\n"
-        "Q                                                                             Q\n"
-        "Q                        Use ' ' to go down the ladder         ...            Q\n"
-        "Q                                                             (()))           Q\n"
-        "Q                           Use ' ' to stay in place          {' ())          Q\n"
-        "Q                                                              ) (()          Q\n"
-        "Q                    Goal: to reach the princess (' ') ->   @ (   ()          Q\n"
-        "Q                                                            \\7 \\ ) |         Q\n"
-        "Q                                                            {)=== /\\         Q\n"
-        "Q                                                             \\ |    |        Q\n"
-        "Q                                                               |    |        Q\n"
-        "Q                                                               |    |        Q\n"
-        "Q                                                               |    |        Q\n"
-        "Q                                                               |    |        Q\n"
-        "Q                                                               |    |        Q\n"
-        "Q         [9] Back to main menu                                 '~~~~'        Q\n"
-        "Q                                                                /Y           Q\n"
-        "Q=============================================================================Q";
+        "Q==============================================================================Q\n"
+        "Q                                                                              Q\n"
+        "Q                                 Instructions:                                Q\n"
+        "Q                                 ____________                                 Q\n"
+        "Q                                                                              Q\n"
+        "Q              Use ' ' or ' ' to move left or right accordingly                Q\n"
+        "Q                                                                              Q\n"
+        "Q                     Use ' ' to jump or go up the ladder                      Q\n"
+        "Q                                                                              Q\n"
+        "Q                        Use ' ' to go down the ladder         ...             Q\n"
+        "Q                                                             (()))            Q\n"
+        "Q                           Use ' ' to stay in place          {' ())           Q\n"
+        "Q                                                              ) (()           Q\n"
+        "Q                    Goal: to reach the princess (' ') ->   @ (   ()           Q\n"
+        "Q                                                            \\7 \\ ) |          Q\n"
+        "Q                                                            {)=== /\\          Q\n"
+        "Q                                                             \\ |    |         Q\n"
+        "Q                                                               |    |         Q\n"
+        "Q                                                               |    |         Q\n"
+        "Q                                                               |    |         Q\n"
+        "Q                                                               |    |         Q\n"
+        "Q                                                               |    |         Q\n"
+        "Q         [9] Back to main menu                                 '~~~~'         Q\n"
+        "Q                                                                /Y            Q\n"
+        "Q==============================================================================Q";
 
     std::string optionsScreen =
-        "Q=============================================================================Q\n"
-        "Q                                                                             Q\n"
-        "Q                                    Options:                                 Q\n"
-        "Q                                    _______                                  Q\n"
-        "Q                                                                             Q\n"
-        "Q                          [5] Colors [   ]                                   Q\n"
-        "Q                          [6] Console log                                    Q\n"
-        "Q                          [7] difficulty level:                              Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q         [9] Back to main menu                                               Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q=============================================================================Q";
+        "Q==============================================================================Q\n"
+        "Q                                                                              Q\n"
+        "Q                                    Options:                                  Q\n"
+        "Q                                    _______                                   Q\n"
+        "Q                                                                              Q\n"
+        "Q                          [5] Colors [   ]                                    Q\n"
+        "Q                          [6] Console log                                     Q\n"
+        "Q                          [7] difficulty level:                               Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q         [9] Back to main menu                                                Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q==============================================================================Q";
 
     std::string FileErrorLogScreen =
-        "Q=============================================================================Q\n"
-        "Q                                                                             Q\n"
-        "Q   <q                             Console log:                          e>   Q\n"
-        "Q                                    _______                                  Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q         [9] Back to main menu                                               Q\n"
-        "Q                                                                             Q\n"
-        "Q                                                                             Q\n"
-        "Q=============================================================================Q";
+        "Q==============================================================================Q\n"
+        "Q                                                                              Q\n"
+        "Q   <q                             Console log:                           e>   Q\n"
+        "Q                                    _______                                   Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q         [9] Back to main menu                                                Q\n"
+        "Q                                                                              Q\n"
+        "Q                                                                              Q\n"
+        "Q==============================================================================Q";
 
     std::string gameOverScreen =
-        "Q=============================================================================Q\n"
-        "Q                                                                             Q\n"
-        "Q          GGGGG  AAAAA  M     M  EEEEE    OOO   V   V  EEEEE  RRRR           Q\n"
-        "Q         G       A   A  MM   MM  E       O   O  V   V  E      R   R          Q\n"
-        "Q         G  GG   AAAAA  M M M M  EEEE    O   O  V   V  EEEE   RRRR           Q\n"
-        "Q         G   G   A   A  M  M  M  E       O   O   V V   E      R  R           Q\n"
-        "Q          GGGG   A   A  M     M  EEEEE    OOO     V    EEEEE  R   R          Q\n"
-        "Q                                                                             Q\n"
-        "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ\n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                   Game Over!                                  \n"
-        "                              Returning To main menu                           ";
+        "Q==============================================================================Q\n"
+        "Q                                                                              Q\n"
+        "Q          GGGGG  AAAAA  M     M  EEEEE       OOO   V   V  EEEEE  RRRR         Q\n"
+        "Q         G       A   A  MM   MM  E          O   O  V   V  E      R   R        Q\n"
+        "Q         G  GG   AAAAA  M M M M  EEEE       O   O  V   V  EEEE   RRRR         Q\n"
+        "Q         G   G   A   A  M  M  M  E          O   O   V V   E      R  R         Q\n"
+        "Q          GGGG   A   A  M     M  EEEEE       OOO     V    EEEEE  R   R        Q\n"
+        "Q                                                                              Q\n"
+        "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ\n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                    Game Over!                                  \n"
+        "                               Returning To main menu                            ";
 
 
     std::string pauseScreen =
@@ -207,32 +206,32 @@ class Menu {
         "Q==============================================================================Q";
 
     std::string gameWonScreen =
-        "Q=============================================================================Q\n"
-        "Q                                                                             Q\n"
-        "Q          Y   Y   OOOOO  U   U       !!!      WWW     WWW   OOOOO   N   N    Q\n"
-        "Q           Y Y    O   O  U   U       !!!       W       W    O   O   NN  N    Q\n"
-        "Q            Y     O   O  U   U       !!!       W   W   W    O   O   N N N    Q\n"
-        "Q            Y     O   O  U   U                 W  W W  W    O   O   N  NN    Q\n"
-        "Q            Y     OOOOO   UUU        !!!        W     W     OOOOO   N   N    Q\n"
-        "Q                                                                             Q\n"
-        "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ\n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                                                               \n"
-        "                                Congratulations!                               \n"
-        "                              ON TO THE NEXT STAGE!                              ";
+        "Q==============================================================================Q\n"
+        "Q                                                                              Q\n"
+        "Q          Y   Y   OOOOO  U   U             WWW     WWW   OOOOO   N   N        Q\n"
+        "Q           Y Y    O   O  U   U              W       W    O   O   NN  N        Q\n"
+        "Q            Y     O   O  U   U              W   W   W    O   O   N N N        Q\n"
+        "Q            Y     O   O  U   U              W  W W  W    O   O   N  NN        Q\n"
+        "Q            Y     OOOOO   UUU                W     W     OOOOO   N   N        Q\n"
+        "Q                                                                              Q\n"
+        "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ\n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                                                                \n"
+        "                                Congratulations!                                \n"
+        "                              ON TO THE NEXT STAGE!                             ";
 
     std::string selectLevelScreen =
-        "Q=============================================================================Q\n"
-        "Q                              Select a Level                                 Q\n"
-        "Q=============================================================================Q\n";
+        "Q==============================================================================Q\n"
+        "Q                               Select a Level                                 Q\n"
+        "Q==============================================================================Q";
 
     // Menu Display
     void printMainMenu() const { gotoxy(0, 0); std::cout << mainMenu; }
@@ -271,11 +270,11 @@ class Menu {
     void playExitSound() const;
 
 public:
-    Menu(Board& board) : gameManager(board, difficultyLevel, isColor) { // Constructor
+    Menu(Board& board, InputProvider* input, ConsoleRenderer* renderer, GameObserver* observer)
+	: gameManager(board, difficultyLevel, isColor, input, renderer, observer) { // Constructor
         chosen = false;
         menuChar = '\0';
         isArrow = false;
-        MenuChoice = false;
 		isColor = false;
         firstPrint = true;
         difficultyLevel = Difficulty::Easy;

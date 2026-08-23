@@ -1,7 +1,5 @@
 #include "GameManager.h"
-#include <conio.h>
-#include <random>
-#include <windows.h>
+#include <iostream>
 #include "Board.h"
 #include "BigGhost.h"
 #include "SmallGhost.h"
@@ -10,6 +8,7 @@
 #include "Pauline.h"
 #include "DonkeyKong.h"
 #include "Legend.h"
+#include "ConsoleRenderer.h"
 
 GameManager::~GameManager() { // Destructor
 	// Cleaning the levels list before exiting the game to avoid memory leaks
@@ -24,21 +23,28 @@ GameManager::~GameManager() { // Destructor
 	delete mario;
 	delete pauline;
 	delete donkeyKong;
+
+	delete uncollectedHammer;
+	delete legend;
 }
 
 // This function initiates the gameplay, manages the snake movement, collision checks, and apple interactions
 GameManager::GameResult GameManager::playGame() {
-	board.print(isColor, *legend);
+	if (renderer)
+		renderer->renderBoard(board, *legend, isColor);
 
 	while (true) {
 		// Handle user input
-		if (_kbhit()) {
-			char key = _getch();
+		char key = inputProvider->getInput(ticks);
 
-			if (key == Menu::ESC_CH)
+		if (key != '\0') {
+			if (inputProvider->allowEsc() && key == Menu::ESC_CH)
 				return GameResult::Paused;
 
-			mario->setPressedKey(tolower(key));
+			mario->setPressedKey(key);
+
+			if (observer)
+				observer->onStep(ticks, key);
 		}
 
 		// Enemies movement
@@ -96,45 +102,50 @@ GameManager::GameResult GameManager::playGame() {
 
 		pauline->updateWinCondition(mario->getMarioX(), mario->getMarioY());
 		if (checkWinCondition()) {
+			if (observer)
+				observer->onResult(ticks, Pauline::PAULINE_ICON, score);
+
 			currentLevel++;
 			if (singleLevelMode || currentLevel == levels.end())  // Case: They beat the whole game!
 				return GameResult::Won;
 
-			clearAllEntities();
-			board.setLevel(*currentLevel);
-			setupNewLevel();
-			mario->reset();
-			clearScr();
-			board.reset();
+			prepareLevelData();
 
 			for (auto* life : uncollectedExtraLives)
 				life->drawToBoard();
 
-			board.print(isColor, *legend);
+			if (renderer) {
+				renderer->clear();
+				renderer->renderBoard(board, *legend, isColor);
+			}
+
 			ticks++;
 			continue; // Skips the rest of the tick since we just loaded a new level
 		}
 
 		auto report = checkIfMarioHit();
-		if (report.source != DamageSource::None)
-			handleMarioDeath();
+		if (report.source != DamageSource::None) {
+			char damageChar = '\0';
 
-		if (mario->marioLifePoints() <= 0)
-			return GameResult::Lost;
-		
-		Sleep(refreshRateMs);
-		ticks++;
+			if (report.sourceEntity)
+				damageChar = report.sourceEntity->getIcon();
+			else // Case: fall damage
+				damageChar = Mario::MARIO_ICON;
+
+			if (observer && damageChar != '\0')
+				observer->onResult(ticks, damageChar);
+
+			handleMarioDeath();
+			if (mario->marioLifePoints() <= 0)
+				return GameResult::Lost;
+		}
+
+		if (renderer)
+			renderer->wait(renderDelayMs);
+
+		++ticks;
 		manageScore();
 	}
-}
-
-// This function generates a random seed for the small ghost
-unsigned int GameManager::randomizeSeedForSmallGhost() {
-
-	std::random_device rd;
-	unsigned int seedRes = rd();
-
-	return seedRes;
 }
 
 void GameManager::updateBarrels() {
@@ -190,7 +201,7 @@ void GameManager::tryCollectExtraLives() {
 			++extraLifeIterator;
 	}
 
-	if (lifeGained)
+	if (renderer &&lifeGained)
 		legend->drawToConsole();
 }
 
@@ -216,19 +227,21 @@ void GameManager::clearAllEntities() {
 }
 
 void GameManager::manageScore() {
-	int tickThreshold = static_cast<int>(refreshRateMs * -0.35 + 57.5);
+	int tickThreshold = static_cast<int>(logicalRefreshRateMs * -0.35 + 57.5);
 	if (tickThreshold < 1) // Case: refreshRateMs is too slow to calculate a proper threshold
 		tickThreshold = 1;
 
 	if (ticks > 0 && ticks % tickThreshold == 0 && score > 0) {
 		score--;
-		legend->drawToConsole(); // Update UI instantly
+		if (renderer)
+			legend->drawToConsole(); // Update UI instantly
 	}
 }
 
 void GameManager::addScore(int points) {
 	score += points;
-	legend->drawToConsole(); // Update UI instantly
+	if (renderer)
+		legend->drawToConsole(); // Update UI instantly
 }
 
 void GameManager::triggerLegendBump() {
@@ -249,27 +262,27 @@ void GameManager::triggerLegendBump() {
 	}
 
 	// 3. Color Bump Flash Effect
-	legend->flashYellow();
+	if (renderer)
+		legend->flashYellow();
 }
 
 void GameManager::resetEnemies() {
 	barrels.clear();
 	ghosts.clear();
-	readGhosts(board.getLevel());
+	readGhosts(board.getLevel(), currentLevelSeed);
 	donkeyKong->reset();
 }
 
-void GameManager::readGhosts(const Level& level) {
+void GameManager::readGhosts(const Level& level, unsigned int seed) {
 	const auto& lvl = level.getOriginalLevel();
 	const auto& ghostSpawns = level.getGhostsSpawnPoints();
-	unsigned int seedForSmallGhost = randomizeSeedForSmallGhost();
 
 	for (const auto& spawn : ghostSpawns) {
 		
 		char icon = lvl[spawn.second][spawn.first];
 
 		if (icon == SmallGhost::SMALL_GHOST_ICON)
-			ghosts.push_back(std::make_unique<SmallGhost>(spawn.first, spawn.second, board, isColor, seedForSmallGhost));
+			ghosts.push_back(std::make_unique<SmallGhost>(spawn.first, spawn.second, board, isColor, seed));
 		else if (icon == BigGhost::BIG_GHOST_ICON)
 			ghosts.push_back(std::make_unique<BigGhost>(spawn.first, spawn.second, board, isColor, mario->getMarioXRef(), mario->getMarioYRef()));
 	}
@@ -311,7 +324,6 @@ GameManager::MarioDamageReport GameManager::checkIfMarioHit() const {
 }
 
 void GameManager::handleMarioDeath() {
-	// TODO: reset logic after mario death
 	std::cin.clear();
 
 	if (mario->marioLifePoints() > 0)
@@ -319,7 +331,10 @@ void GameManager::handleMarioDeath() {
 
 	mario->reset();
 	board.reset();
-	legend->drawToConsole();
+
+	if (renderer)
+		legend->drawToConsole();
+
 	resetEnemies();
 
 	delete uncollectedHammer;
@@ -329,8 +344,11 @@ void GameManager::handleMarioDeath() {
 	for (auto* life : uncollectedExtraLives)
 		life->drawToBoard();
 
-	clearScr();
-	board.print(isColor, *legend);
+	if (renderer)
+		renderer->clear();
+
+	if (renderer)
+		renderer->renderBoard(board, *legend, isColor);
 }
 
 bool GameManager::checkWinCondition() const {
@@ -346,6 +364,9 @@ void GameManager::startNewGame() {
 	// Reset progress to the first level
 	currentLevel = levels.begin();
 
+	if (mario != nullptr)
+		mario->restoreLives();
+
 	prepareLevelData();
 }
 
@@ -357,12 +378,24 @@ void GameManager::prepareLevelData() {
 	// 2. Load the target level
 	board.setLevel(*currentLevel);
 
+	// Load the level input data from the input provider
+	std::string currentFilename = (*currentLevel)->getFilename();
+	inputProvider->loadLevelInput(currentFilename);
+	currentLevelSeed = inputProvider->getSeed();
+	unsigned int fileMs = inputProvider->getRefreshRate();
+	if (fileMs > 0) {
+		logicalRefreshRateMs = fileMs; // Use the file's original difficulty for math
+		renderDelayMs = 5;             // Fast-forward the visual render speed!
+	}
+
+	if (observer)
+		observer->onLevelStart(currentFilename, currentLevelSeed, logicalRefreshRateMs);
+
 	// Setup DK, ghosts, barrels, hammer and extra lives for the new board
 	setupNewLevel();
 
 	// 3. Reset Mario and safely redraw
 	if (mario != nullptr) {
-		mario->restoreLives();
 		mario->reset();
 		board.reset();
 	}
@@ -384,6 +417,9 @@ void GameManager::startSpecificLevel(const std::string& filename) {
 			break;
 		}
 
+	if (mario != nullptr)
+		mario->restoreLives();
+
 	prepareLevelData();
 }
 
@@ -394,7 +430,7 @@ void GameManager::setupNewLevel() {
 	initializeHammer(board.getLevel());
 
 	readExtraLives(board.getLevel());
-	readGhosts(board.getLevel());
+	readGhosts(board.getLevel(), currentLevelSeed);
 
 	score = MAX_INIT_SCORE;
 	legend = new Legend(board.getLevel().getLegendPositionX(), board.getLevel().getLegendPositionY(), mario->getMarioLifeRef(), score, isColor);

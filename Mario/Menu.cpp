@@ -309,7 +309,7 @@ void Menu::printConsoleLogScreen(size_t currentErrorPage) {
 	// 2. Handle perfect loads (no errors)
 	if (errorLog.empty()) {
 		const std::string successMsg = "No errors found! All screens loaded successfully.";
-		int startX = (GameManager::MAX_X - successMsg.length()) / 2;
+		int startX = (GameManager::MAX_X - static_cast<int>(successMsg.length())) / 2;
 		gotoxy(startX, 10);
 		std::cout << GREEN << successMsg << RESET;
 	}
@@ -531,9 +531,10 @@ void Menu::gameOverLogic() {
 	printGameOverScreen();
 	// playWinSound();
 	Sleep(1000);
-	gameReset();
 	state = GameState::MainMenu;
 	firstPrint = true;
+	ResetMenu();
+	resetAllArrows();
 	clearScr();
 }
 
@@ -542,9 +543,10 @@ void Menu::gameWonLogic() {
 	printGameWonScreen();
 	// playWinSound();
 	Sleep(1000);
-	gameReset();
 	state = GameState::MainMenu;
 	firstPrint = true;
+	ResetMenu();
+	resetAllArrows();
 	clearScr();
 }
 

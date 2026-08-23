@@ -1,5 +1,4 @@
 #pragma once
-#include <iostream>
 #include <list>
 #include <string>
 #include <unordered_map>
@@ -7,8 +6,10 @@
 #include <memory>
 #include "Barrel.h"
 #include "ExtraLife.h"
+#include "GameObserver.h"
 #include "Ghost.h"
 #include "Hammer.h"
+#include "InputProvider.h"
 #include "Level.h"
 #include "ScreenLoader.h"
 
@@ -18,6 +19,7 @@ class DonkeyKong;
 class Mario;
 class Pauline;
 class Legend;
+class ConsoleRenderer;
 
 enum class Difficulty { Easy, Hard };
 
@@ -26,14 +28,13 @@ class GameManager {
     static constexpr unsigned int MAX_INIT_SCORE = 10000;
 
     // Data Members
-    bool firstPrint;
-    bool gameStart;
-    bool paused;
     bool& isColor;
     int ticks;
     unsigned int score;
-    unsigned int refreshRateMs;
+    unsigned int logicalRefreshRateMs;
+    unsigned int renderDelayMs;
     bool singleLevelMode;
+    unsigned int currentLevelSeed;
 
     // References to game objects
     ScreenLoader screenLoader;
@@ -48,6 +49,11 @@ class GameManager {
     std::vector<std::unique_ptr<Ghost>> ghosts;
     std::list<Level*> levels;
     std::list<Level*>::iterator currentLevel;
+
+    // Load and save management
+    InputProvider* inputProvider;
+    ConsoleRenderer* renderer;
+    GameObserver* observer;
 
     // Mario Damage Management
     enum class DamageSource { None, Barrel, Ghost, DonkeyKong, Fall };
@@ -90,8 +96,7 @@ class GameManager {
     void updateBarrels();
 
     // Ghosts management
-    unsigned int randomizeSeedForSmallGhost();
-    void readGhosts(const Level& level);
+    void readGhosts(const Level& level, unsigned int seed);
     void updateGhosts();
 
     // Hammer management
@@ -105,18 +110,17 @@ class GameManager {
     void clearAllEntities();
 
 public:
-    GameManager(Board& B, const Difficulty& difficulty, bool& isColor) : board(B), difficultyLevel(difficulty), isColor(isColor) { // Constructor
+    GameManager(Board& B, const Difficulty& difficulty, bool& isColor, InputProvider* input, ConsoleRenderer* renderer, GameObserver* observer)
+	: board(B), difficultyLevel(difficulty), isColor(isColor), inputProvider(input), renderer(renderer), observer(observer) { // Constructor
         mario = nullptr;
         pauline = nullptr;
         donkeyKong = nullptr;
         uncollectedHammer = nullptr;
     	legend = nullptr;
-        firstPrint = false;
-        gameStart = false;
-        paused = false;
         ticks = 0;
         score = MAX_INIT_SCORE;
-        refreshRateMs = (difficultyLevel == Difficulty::Hard) ? 50 : 150;
+        logicalRefreshRateMs = (difficultyLevel == Difficulty::Hard) ? 50 : 150;
+        renderDelayMs = logicalRefreshRateMs;
         singleLevelMode = false;
     }
 
@@ -143,5 +147,5 @@ public:
     
     // Setters
     void setColor(bool color) { isColor = color; }
-    void setDelayTimer(unsigned int ms) { refreshRateMs = ms; }
+    void setDelayTimer(unsigned int ms) { logicalRefreshRateMs = ms; renderDelayMs = ms; }
 };

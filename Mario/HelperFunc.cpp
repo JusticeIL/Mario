@@ -24,3 +24,27 @@ void ShowConsoleCursor(bool showFlag) {
 void clearScr() {
     system("cls");
 }
+
+void chooseGameMode(int argc, char* argv[], bool& isLoad, bool& isSave, bool& isSilent) {
+    for (int i = 1; i < argc; ++i) {
+        std::string command = argv[i];
+
+        if (command == "-load") // Case: load
+            isLoad = true;
+        else if (command == "-silent") // Case: silent
+            isSilent = true;
+        else if (command == "-save" && !isLoad) // Case: save
+            isSave = true;
+    }
+
+    if (isLoad && isSave) // If load is on, turn off save
+        isSave = false;
+}
+
+std::string getBaseName(const std::string& filename) {
+    size_t dotPos = filename.find_last_of('.');
+    if (dotPos != std::string::npos)
+        return filename.substr(0, dotPos);
+
+    return filename;
+}

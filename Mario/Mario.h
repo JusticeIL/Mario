@@ -56,6 +56,8 @@ public:
 		hammer = nullptr;
 	}
 
+	~Mario() override { delete hammer; }
+
 	static constexpr char MARIO_ICON = '@';
 	static constexpr char MARIO_HAMMER_ICON = 'M';
 	static constexpr char HAMMER_ICON = 'P';

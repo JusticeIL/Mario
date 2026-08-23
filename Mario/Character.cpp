@@ -36,6 +36,9 @@ void Character::drawToBoard() {
 }
 
 void Character::drawToConsole() const {
+	if (board.isSilent())
+		return;
+
 	if (!isDead) {
 		gotoxy(x, y);
 		if (isColor) {

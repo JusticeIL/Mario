@@ -16,7 +16,7 @@ void BigGhost::setDirection() { // "Sophisticated algorithm that tries to hunt M
 	}
 
 	else {// Case: Ghost is chasing mario on the current floor
-		char ChBelow = board.isWithinBounds(x, y + 1) ? board.getBoardChar(x, y + 1) : '\0';
+		char ChBelow = board.getBoardChar(x, y + 1);
 
 		if (x < marioX && (Tiles::isTile(ChBelow) || ChBelow == Board::WALL))
 			currDirX = 1;
@@ -44,9 +44,9 @@ bool BigGhost::tryClimb() {
 }
 
 void BigGhost::updateState() {
-	char chBelowBelow = board.isWithinBounds(x, y + 2) ? board.getBoardChar(x, y + 2) : '\0'; // Char below^2 Ghost
-	char chBelow = board.isWithinBounds(x, y + 1) ? board.getBoardChar(x, y + 1) : '\0';  // Char below Ghost
-	char chAbove = board.isWithinBounds(x, y - 1) ? board.getBoardChar(x, y - 1) : '\0';  // Char above Ghost
+	char chBelowBelow = board.getBoardChar(x, y + 2); // Char below^2 Ghost
+	char chBelow = board.getBoardChar(x, y + 1);  // Char below Ghost
+	char chAbove = board.getBoardChar(x, y - 1);  // Char above Ghost
 
 	if (chBelow == Board::LADDER || (chAbove == Board::LADDER && y < marioY))  // Case: on a ladder, or should climb up
 		onLadder = true;
@@ -96,7 +96,7 @@ bool BigGhost::isValidToMove() {
 	}
 
 	char nextCh = board.getBoardChar(nextPosX, nextPosY);
-	char chBelow = board.isWithinBounds(x, y + 1) ? board.getBoardChar(x, y + 1) : '\0';
+	char chBelow = board.getBoardChar(x, y + 1);
 
 	// Allow Big Ghost to climb through floor tiles
 	if (Tiles::isTile(nextCh)) {

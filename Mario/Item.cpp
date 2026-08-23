@@ -5,6 +5,8 @@
 #include "Colors.h"
 
 void Item::drawToConsole() const {
+	if (board.isSilent())
+		return;
 
 	gotoxy(x, y);
 	if (isColor)

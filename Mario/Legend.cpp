@@ -1,4 +1,5 @@
 #include "Legend.h"
+#include <iostream>
 #include "Board.h"
 #include "HelperFunc.h"
 
