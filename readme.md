@@ -188,36 +188,21 @@ A replay is not a special mode inside the game — it is a different `InputProvi
 
 ## THE CLASS HIERARCHY
 
-```mermaid
-flowchart TD
-    ASSET["Asset<br/>position · icon · colour · draw and erase"]
-    CHARACTER["Character<br/>can die"]
-    ITEM["Item<br/>can be collected"]
-    MARIO["Mario"]
-    PAULINE["Pauline"]
-    ENEMY["Enemy<br/>can hit Mario"]
-    DK["DonkeyKong<br/>never moves, owns a BarrelFactory"]
-    MOVING["MovingEnemy<br/>hits Mario and moves"]
-    BARREL["Barrel<br/>rolls, falls, explodes"]
-    GHOST["Ghost"]
-    SMALL["SmallGhost<br/>seeded RNG, patrols a floor"]
-    BIG["BigGhost<br/>chases Mario, climbs ladders"]
-    HAMMER["Hammer"]
-    LIFE["ExtraLife"]
-
-    ASSET --> CHARACTER
-    ASSET --> ITEM
-    CHARACTER --> MARIO
-    CHARACTER --> PAULINE
-    CHARACTER --> ENEMY
-    ENEMY --> DK
-    ENEMY --> MOVING
-    MOVING --> BARREL
-    MOVING --> GHOST
-    GHOST --> SMALL
-    GHOST --> BIG
-    ITEM --> HAMMER
-    ITEM --> LIFE
+```
+Asset                         position, icon, colour, draw/erase to board and console
+├── Character                 can die
+│   ├── Mario
+│   ├── Pauline
+│   └── Enemy                 can hit Mario
+│       ├── DonkeyKong        static, owns a BarrelFactory
+│       └── MovingEnemy       can hit Mario and moves
+│           ├── Barrel
+│           └── Ghost
+│               ├── SmallGhost    seeded RNG, patrols
+│               └── BigGhost      chases Mario, climbs
+└── Item                      can be collected
+    ├── Hammer
+    └── ExtraLife
 ```
 
 `~Asset` erases the entity from both the board and the console, so destroying an object is what removes it from the screen — there is no separate cleanup pass.
