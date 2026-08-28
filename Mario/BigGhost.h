@@ -9,6 +9,9 @@ class BigGhost : public Ghost {
 	int& marioY;
 	bool onLadder;
 
+	// Ghost sophisticated search
+	void searchMario();
+
 public:
 	BigGhost(int x, int y, Board& b, bool& isColor, int& marioX, int& marioY) : Ghost(x, y, BIG_GHOST_ICON, b, isColor),
 		marioX(marioX), marioY(marioY), onLadder(false) {}

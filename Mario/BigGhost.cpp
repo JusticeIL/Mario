@@ -2,29 +2,97 @@
 #include "Board.h"
 #include "Tiles.h"
 
-void BigGhost::setDirection() { // "Sophisticated algorithm that tries to hunt Mario"
-		currDirY = 0;
-	if (y != marioY) {
-		if (!tryClimb()) {
-			if (x < marioX)
-				currDirX = 1;
-			else if (x == marioX)
-				currDirX = 0;
-			else // Case: Mario is behind the ghost
-				currDirX = -1;
+void BigGhost::searchMario() {
+	if (tryClimb()) // Case: climbing
+		return;
+
+	// Where are we heading?
+	bool wantUp = (y > marioY);
+	bool wantDown = (y < marioY);
+
+	if (y == marioY) { // Case: same floor, but path blocked so we would like to make a detour, looking for a ladder
+		wantUp = true;
+		wantDown = true;
+	}
+
+	int targetLadderX = -1;
+
+	for (int i = GameManager::MIN_X; i < GameManager::MAX_X; ++i) { // Go over current floor level
+		char curr = board.getBoardChar(i, y);
+		char belowBelow = board.getBoardChar(i, y + 2);
+		char above = board.getBoardChar(i, y - 1);
+
+		bool canGoUp = (curr == Board::LADDER);
+		bool canGoDown = (belowBelow == Board::LADDER);
+
+		if ((wantUp && canGoUp) || (wantDown && canGoDown)) { // Case: found a potential ladder in the right direction
+			bool pathClear = true;
+			if (i != x) { // Case: not on ladder anymore
+				int step = (i > x) ? 1 : -1;
+
+				for (int j = x + step; j != i; j += step) {
+					char theCh = board.getBoardChar(j, y);
+					char belowTheCh = board.getBoardChar(j, y + 1);
+
+					if (Tiles::isTile(theCh) || theCh == Board::WALL || (belowTheCh == Board::EMPTY && theCh != Board::LADDER)) {
+						pathClear = false;
+						break;
+					}
+				}
+			}
+
+			if (pathClear) { // Case: found a ladder with a clear path
+				targetLadderX = i;
+				break;
+			}
 		}
 	}
 
-	else {// Case: Ghost is chasing mario on the current floor
-		char ChBelow = board.getBoardChar(x, y + 1);
-
-		if (x < marioX && (Tiles::isTile(ChBelow) || ChBelow == Board::WALL))
+	if (targetLadderX != -1) { // Case: found an available ladder, go to it
+		if (x < targetLadderX)
 			currDirX = 1;
-		else if (x > marioX && (Tiles::isTile(ChBelow) || ChBelow == Board::WALL))
+		else if (x > targetLadderX)
 			currDirX = -1;
-		else if (x == marioX)
+		else // Case: arrived at a ladder
 			currDirX = 0;
 	}
+	else { // Case: fallback - no ladder available, just go towards Mario
+		if (x < marioX)
+			currDirX = 1;
+		else if (x > marioX)
+			currDirX = -1;
+		else
+			currDirX = 0;
+	}
+}
+
+void BigGhost::setDirection() { // "Sophisticated algorithm that tries to hunt Mario"
+	currDirX = 0;
+	currDirY = 0;
+
+	if (y == marioY) { // Case: mario and ghost are on the same floor
+		int step = (marioX > x) ? 1 : -1;
+		bool clearPath = true;
+
+		for (int i = x + step; i != marioX; i += step) { // Check for clear path horizontally
+			char chBelow = board.getBoardChar(i, y + 1);
+			char chCurrent = board.getBoardChar(i, y);
+
+			if (Tiles::isTile(chCurrent) || chCurrent == Board::WALL ||
+				(chBelow == Board::EMPTY && chCurrent != Board::LADDER)) {
+				clearPath = false;
+				break;
+			}
+		}
+
+		if (clearPath) { // Case: clear path to Mario horizontally
+			currDirX = step;
+			return;
+		}
+	}
+
+	// Mario is on another floor or path to him is blocked
+	searchMario();
 }
 
 bool BigGhost::tryClimb() {
