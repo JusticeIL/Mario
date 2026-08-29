@@ -31,6 +31,7 @@ Mario is a Donkey Kong arcade climb drawn in 80×25 characters of console text, 
     * [The menu](#the-menu)
     * [What the glyphs mean](#what-the-glyphs-mean)
     * [Lives and score](#lives-and-score)
+    * [Sound](#sound)
 * [HOW IT WORKS](#how-it-works)
     * [The class hierarchy](#the-class-hierarchy)
     * [The level file](#the-level-file)
@@ -79,7 +80,7 @@ Target|Status
 Windows 10 / 11 + Visual Studio 2022|Supported
 Windows Terminal|Supported — handles the ANSI escape sequences as-is
 `conhost.exe` (the classic console window)|Playable. Nothing in the code turns on virtual-terminal processing, so on an old host **Colors** may print escape sequences instead of colouring the board. Turn colour off in Options
-Linux / macOS|Not supported — `windows.h`, `conio.h` and `system("cls")` have no equivalent here
+Linux / macOS|Not supported — `windows.h`, `conio.h`, `Beep` and `system("cls")` have no equivalent here
 
 # HOW TO PLAY
 
@@ -129,7 +130,7 @@ Glyph|Meaning
 `&`|Donkey Kong. He never moves, but he is solid and he throws
 `O`|A barrel
 `x`|A small ghost — patrols one floor, turns around at ledges and occasionally on a whim
-`X`|A big ghost — walks toward Mario and climbs ladders to reach him
+`X`|A big ghost — hunts Mario
 `p`|The hammer, waiting to be collected
 `T`|An extra life
 `H`|A ladder
@@ -151,6 +152,10 @@ Each tick of standing around|Roughly −1 point every 5 ticks on Easy, every 40 
 Smashing a barrel or a ghost with the hammer|+10
 
 There is one more way to score, and it is not written down here. The legend is drawn on the board like everything else, and Mario has a head — the rest is yours to find.
+
+## SOUND
+
+There are no audio files. Losing, winning and leaving the game each play their own short melody, and every note is generated at run time by `Beep`, the single-voice square tone the PC speaker has been making since DOS.
 
 # HOW IT WORKS
 
@@ -258,6 +263,9 @@ The console host is not interpreting ANSI escape sequences and the game does not
 
 **A barrel blew up on its own.**
 That is the rule: a barrel that falls eight rows or more explodes when it lands, in two radii, and takes itself off the board.
+
+**A big ghost followed me up a ladder and came through the floor.**
+Working as intended. `X` hunts across floors, and it enters a floor tile only at the mouth of a ladder — the same allowance Mario has when he climbs.
 
 **Mario died and nothing touched him.**
 A fall of five rows or more is fatal. Four is survivable, and the counter resets the moment he lands or catches a ladder.
