@@ -12,8 +12,7 @@
 #include "Tiles.h"
 
 using point = std::pair<int, int>;
-
-// This function retrieves the names of valid screen files in the current directory
+// This function returns a sorted list of the names of all the valid screen files found in the game's directory
 std::list<std::string> ScreenLoader::getScreenFileNames() {
     namespace fs = std::filesystem;
     std::list<std::string> FilesFromFolder;
@@ -30,12 +29,13 @@ std::list<std::string> ScreenLoader::getScreenFileNames() {
     return FilesFromFolder;
 }
 
-Level* ScreenLoader::TryLoadLevel(const std::string fileName) {
+// This function receives a screen file's name, and returns a new level built from it, and throws an exception listing the missing or duplicated components if the file is invalid
+Level* ScreenLoader::TryLoadLevel(const std::string& fileName) {
 
 	std::ifstream file(fileName);
 
 	if (!file.is_open())
-		return nullptr;
+        throw std::runtime_error("Error: Could not open file " + fileName + ".");
 
     std::vector<std::string> lvl;
 

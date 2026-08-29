@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 void gotoxy(int x, int y);
 void ShowConsoleCursor(bool showFlag);

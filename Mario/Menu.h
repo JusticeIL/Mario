@@ -267,6 +267,7 @@ class Menu {
 
     // Sound FX
     void playWinSound() const;
+    void playLoseSound() const;
     void playExitSound() const;
 
 public:

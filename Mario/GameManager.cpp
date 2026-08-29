@@ -10,6 +10,7 @@
 #include "Legend.h"
 #include "ConsoleRenderer.h"
 
+// This function frees every object the manager allocated: the levels list, the uncollected extra lives, Mario, Pauline, Donkey Kong, the hammer and the legend
 GameManager::~GameManager() { // Destructor
 	// Cleaning the levels list before exiting the game to avoid memory leaks
 	for (auto levelIterator = levels.begin(); levelIterator != levels.end(); ) {
@@ -28,7 +29,7 @@ GameManager::~GameManager() { // Destructor
 	delete legend;
 }
 
-// This function initiates the gameplay, manages the snake movement, collision checks, and apple interactions
+// This function runs the level's main loop, handling input, enemy movement, collisions, scoring and the win condition on every tick, and returns Won, Lost or Paused according to how the level ended
 GameManager::GameResult GameManager::playGame() {
 	if (renderer)
 		renderer->renderBoard(board, *legend, isColor);
@@ -148,6 +149,7 @@ GameManager::GameResult GameManager::playGame() {
 	}
 }
 
+// This function moves every barrel one step and removes from the list the barrels that are dead
 void GameManager::updateBarrels() {
 	for (auto barrelIterator = barrels.begin(); barrelIterator != barrels.end();) {
 		barrelIterator->move();
@@ -159,6 +161,7 @@ void GameManager::updateBarrels() {
 	}
 }
 
+// This function moves every ghost one step and removes from the list the ghosts that are dead
 void GameManager::updateGhosts() {
 	for (auto ghostIterator = ghosts.begin(); ghostIterator != ghosts.end();) {
 		(*ghostIterator)->move();
@@ -170,6 +173,7 @@ void GameManager::updateGhosts() {
 	}
 }
 
+// This function creates the uncollected hammer of the level, receives level as the loaded level holding its spawn point, and skips creation if the level has no hammer or one already exists
 void GameManager::initializeHammer(const Level& level) {
 	int hammerXPos = level.getHammerSpawnX();
 	int hammerYPos = level.getHammerSpawnY();
@@ -177,6 +181,7 @@ void GameManager::initializeHammer(const Level& level) {
 		uncollectedHammer = new Hammer(hammerXPos, hammerYPos, board, isColor);
 }
 
+// This function creates the extra lives of the level and draws them on the board, receives level as the loaded level holding their spawn points
 void GameManager::readExtraLives(const Level& level) {
 	for (const auto& spawn : level.getExtraLifeSpawnPoints()) {
 		ExtraLife* life = new ExtraLife(spawn.first, spawn.second, board, isColor);
@@ -185,6 +190,7 @@ void GameManager::readExtraLives(const Level& level) {
 	}
 }
 
+// This function grants Mario an extra life if he stepped on one, deletes the collected item and refreshes the legend
 void GameManager::tryCollectExtraLives() {
 	bool lifeGained = false;
 	for (auto extraLifeIterator = uncollectedExtraLives.begin(); extraLifeIterator != uncollectedExtraLives.end(); ) {
@@ -205,6 +211,7 @@ void GameManager::tryCollectExtraLives() {
 		legend->drawToConsole();
 }
 
+// This function deletes all the entities of the current level and empties the barrels and ghosts containers
 void GameManager::clearAllEntities() {
 	delete donkeyKong;
 	donkeyKong = nullptr;
@@ -226,6 +233,7 @@ void GameManager::clearAllEntities() {
 	ghosts.clear();
 }
 
+// This function lowers the score by one every fixed amount of ticks, calculated from the refresh rate, and refreshes the legend
 void GameManager::manageScore() {
 	int tickThreshold = static_cast<int>(logicalRefreshRateMs * -0.35 + 57.5);
 	if (tickThreshold < 1) // Case: refreshRateMs is too slow to calculate a proper threshold
@@ -238,13 +246,15 @@ void GameManager::manageScore() {
 	}
 }
 
+// This function receives points, adds them to the score and refreshes the legend
 void GameManager::addScore(int points) {
 	score += points;
 	if (renderer)
 		legend->drawToConsole(); // Update UI instantly
 }
 
-void GameManager::triggerLegendBump() {
+// This function rewards Mario for bumping his head into the legend with 10 points, an occasional extra life dropped next to it and a yellow flash if in color mode
+void GameManager::triggerLegendBump() { /* Easter Egg */
 	// 1. Reward points
 	score += 10;
 
@@ -266,6 +276,7 @@ void GameManager::triggerLegendBump() {
 		legend->flashYellow();
 }
 
+// This function clears the barrels, respawns the ghosts of the level with the current seed and resets Donkey Kong
 void GameManager::resetEnemies() {
 	barrels.clear();
 	ghosts.clear();
@@ -273,6 +284,7 @@ void GameManager::resetEnemies() {
 	donkeyKong->reset();
 }
 
+// This function receives the loaded level holding the spawn points and seed, and creates the ghosts of the level according to their icon on the board
 void GameManager::readGhosts(const Level& level, unsigned int seed) {
 	const auto& lvl = level.getOriginalLevel();
 	const auto& ghostSpawns = level.getGhostsSpawnPoints();
@@ -288,6 +300,7 @@ void GameManager::readGhosts(const Level& level, unsigned int seed) {
 	}
 }
 
+// This function receives the loaded level holding the spawn point and creates Mario on the first setup or only updates his spawn point on the following levels
 void GameManager::initializeMario(const Level& level) {
 	if (mario == nullptr) // Case: first time setup
 		mario = new Mario(level.getMarioSpawnX(), level.getMarioSpawnY(), board, isColor);
@@ -295,16 +308,19 @@ void GameManager::initializeMario(const Level& level) {
 		mario->setSpawnPoint(level.getMarioSpawnX(), level.getMarioSpawnY());
 }
 
+// This function receives the loaded level holding Donkey Kong's spawn point and creates him if he hasn't been created yet
 void GameManager::initializeDonkeyKong(const Level& level) {
 	if (donkeyKong == nullptr)
 		donkeyKong = new DonkeyKong(level.getDonkeyKongSpawnX(), level.getDonkeyKongSpawnY(), board, isColor);
 }
 
+// This function receives the loaded level holding Pauline's spawn point and creates her if she hasn't been created yet
 void GameManager::initializePauline(const Level& level) {
 	if (pauline == nullptr)
 		pauline = new Pauline(level.getPaulineSpawnX(), level.getPaulineSpawnY(), board, isColor);
 }
 
+// This function returns a damage report holding the damage source (barrel, ghost, Donkey Kong, fall or None) and a pointer to the entity that caused it
 GameManager::MarioDamageReport GameManager::checkIfMarioHit() const {
 	for (const auto& barrel : barrels) // Barrels
 		if (barrel.isHitMario())
@@ -323,6 +339,7 @@ GameManager::MarioDamageReport GameManager::checkIfMarioHit() const {
 	return MarioDamageReport{ nullptr, DamageSource::None };
 }
 
+// This function takes one life from Mario and restarts the level, resetting Mario, the board, the enemies and the hammer, and redrawing the screen
 void GameManager::handleMarioDeath() {
 	std::cin.clear();
 
@@ -351,10 +368,12 @@ void GameManager::handleMarioDeath() {
 		renderer->renderBoard(board, *legend, isColor);
 }
 
+// This function returns true if Mario reached Pauline and false otherwise
 bool GameManager::checkWinCondition() const {
 	return pauline->checkWinCondition();
 }
 
+// This function starts a full game run from the first level and restores Mario's lives, and does nothing if no levels were loaded
 void GameManager::startNewGame() {
 	if (levels.empty()) // Case: no levels are loaded at all
 		return;
@@ -370,6 +389,7 @@ void GameManager::startNewGame() {
 	prepareLevelData();
 }
 
+// This function loads the current level into the board, reads its input data (seed and refresh rate), builds all its entities and resets Mario for the new screen
 void GameManager::prepareLevelData() {
 	// 1. Clear out any old state
 	ticks = 0;
@@ -404,6 +424,7 @@ void GameManager::prepareLevelData() {
 		life->drawToBoard();
 }
 
+// This function receives the name of the screen file to play, starts a single level chosen from the menu by name and restores Mario's lives before loading it
 void GameManager::startSpecificLevel(const std::string& filename) {
 	if (levels.empty()) // Case: no levels are loaded at all
 		return;
@@ -423,6 +444,7 @@ void GameManager::startSpecificLevel(const std::string& filename) {
 	prepareLevelData();
 }
 
+// This function builds all the entities of the current board and creates a new legend with a full score
 void GameManager::setupNewLevel() {
 	initializeDonkeyKong(board.getLevel());
 	initializeMario(board.getLevel());
@@ -436,10 +458,12 @@ void GameManager::setupNewLevel() {
 	legend = new Legend(board.getLevel().getLegendPositionX(), board.getLevel().getLegendPositionY(), mario->getMarioLifeRef(), score, isColor);
 }
 
+// This function adds a new barrel created by Donkey Kong to the barrels list
 void GameManager::donkeyKongThrowsNewBarrel() {
 	barrels.push_back(*donkeyKong->createBarrel());
 }
 
+// This function loads every valid screen file into the levels list, and stores in the error log the error message of each file that failed to load
 void GameManager::loadAllScreens() {
 	for (const auto& filename : screenLoader.getScreenFileNames()) {
 		try {

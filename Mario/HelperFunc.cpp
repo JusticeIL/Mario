@@ -25,6 +25,7 @@ void clearScr() {
     system("cls");
 }
 
+// This function receives command line count and arguments, and turns on the game modes given in the command line 
 void chooseGameMode(int argc, char* argv[], bool& isLoad, bool& isSave, bool& isSilent) {
     for (int i = 1; i < argc; ++i) {
         std::string command = argv[i];
@@ -41,6 +42,7 @@ void chooseGameMode(int argc, char* argv[], bool& isLoad, bool& isSave, bool& is
         isSave = false;
 }
 
+// This function receives filename, and returns it without its extension
 std::string getBaseName(const std::string& filename) {
     size_t dotPos = filename.find_last_of('.');
     if (dotPos != std::string::npos)

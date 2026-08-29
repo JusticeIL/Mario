@@ -9,6 +9,7 @@
 
 using namespace std;
 
+// This function restores the board to the original level's layout using copy assignment, erasing everything the entities drew on it
 void Board::reset() {
 	gameBoard = currentOriginalLevel->getOriginalLevel();
 }
@@ -49,6 +50,7 @@ void Board::print(bool isColor, const Legend& legend) const {
     legend.drawToConsole();
 }
 
+// This function receives a char, and prints it to the console in the color that matches its type
 void Board::printCharWithColor(char ch) {
     if (ch == LADDER)
         std::cout << LADDER_COLOR << ch << RESET;
@@ -68,6 +70,7 @@ void Board::printCharWithColor(char ch) {
         std::cout << ch;
 }
 
+// This function receives a position, and returns the char the board holds there, or a wall for a position outside the board and a floor for one below its bottom
 char Board::getBoardChar(int x, int y) const {
 	if (!isWithinBounds(x, y)) {
 		if (y >= GameManager::MAX_Y)
@@ -79,11 +82,13 @@ char Board::getBoardChar(int x, int y) const {
     return gameBoard[y][x];
 }
 
+// This function receives a position and a char, and writes the char to the board at that position if it is inside the board
 void Board::setBoardChar(int x, int y, char ch) {
 	if (isWithinBounds(x, y))
         gameBoard[y][x] = ch;
 }
 
+// This function receives the new level, and loads its layout as the current board
 void Board::setLevel(const Level* newLevel) {
     currentOriginalLevel = newLevel;
     gameBoard = newLevel->getOriginalLevel();

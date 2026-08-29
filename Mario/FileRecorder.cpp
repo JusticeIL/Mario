@@ -1,8 +1,8 @@
 #include "FileRecorder.h"
-
 #include "HelperFunc.h"
 #include "Pauline.h"
 
+// This function receives the level's name, seed and refresh rate, and opens fresh steps and result files for it, writing the seed and the refresh rate as the first line of the steps file
 void FileRecorder::onLevelStart(const std::string& levelName, unsigned int seed, unsigned int refreshRateMs) {
     // 1. Close files from previous level (if any are still open)
     if (stepsFile.is_open())
@@ -25,6 +25,7 @@ void FileRecorder::onLevelStart(const std::string& levelName, unsigned int seed,
         stepsFile << seed << " " << refreshRateMs << "\n";
 }
 
+// This function receives the tick, the char of the event that happened and the score, and writes them to the result file, while the score is written only on a win
 void FileRecorder::onResult(int tick, char eventType, unsigned int expectedScore) {
     if (resultFile.is_open()) {
         resultFile << tick << " " << eventType;

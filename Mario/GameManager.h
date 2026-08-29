@@ -122,6 +122,7 @@ public:
         logicalRefreshRateMs = (difficultyLevel == Difficulty::Hard) ? 50 : 150;
         renderDelayMs = logicalRefreshRateMs;
         singleLevelMode = false;
+        currentLevelSeed = 0;
     }
 
 	~GameManager(); // Destructor

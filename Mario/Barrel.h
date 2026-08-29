@@ -39,7 +39,7 @@ class Barrel : public MovingEnemy {
 
 public:
 	static constexpr char BARREL_ICON = 'O';
-	static constexpr const char* BARREL_COLOR = ORANGE;
+	static constexpr const char* BARREL_COLOR = BROWN;
 
 	// Barrel movement
 	void move() override;

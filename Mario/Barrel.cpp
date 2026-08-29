@@ -147,6 +147,7 @@ void Barrel::restorePrevChars() const {
 		}
 }
 
+// This function performs the barrel's whole turn: erasing it from its old position, moving and drawing it again
 void Barrel::move() {
 	// Explosion Intercept
 	if (explosionState != ExplosionState::NotExploding) {
@@ -194,6 +195,7 @@ void Barrel::move() {
 	drawToConsole();
 }
 
+// This function sets the barrel's rolling direction according to the floor char below it, keeping its last direction on a straight floor
 void Barrel::setDirection() {
 	char chBelow = board.getBoardChar(x, y + 1);
 
@@ -225,6 +227,7 @@ void Barrel::setDirection() {
 	}
 }
 
+// This function moves the barrel one step down while counting the fall's height, starts an explosion after a fall of 8 rows, and returns it to rolling when it lands on a floor
 void Barrel::fall() {
 	if (fallCounter >= 8 && (!isOnAir || y == (GameManager::MAX_Y - 1))) {
 		startExplode();
@@ -235,16 +238,15 @@ void Barrel::fall() {
 	currDirY = 1;
 
 	char chBelow = board.getBoardChar(x, y + 1); // Check the char below the barrel to change movement and state of the barrel
-	if (Tiles::isTile(chBelow) || chBelow == Board::WALL) 
+	if (Tiles::isTile(chBelow) || chBelow == Board::WALL)
 		setDirection();
-	
-	else 
+	else {
 		isOnAir = true; // If not on a floor, continue falling
-
-	fallCounter++;
+		++fallCounter;
+	}
 }
 
-// This function triggers the barrel's explosion, manages the explosion effects, restores the affected area, and marks the barrel as exploded
+// This function advances the explosion's state machine by one tick
 void Barrel::processExplosion() {
 	switch (explosionState) {
 	case ExplosionState::Radius1:

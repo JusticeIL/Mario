@@ -1,6 +1,5 @@
 #include <iostream>
 #include "Character.h"
-
 #include "BigGhost.h"
 #include "HelperFunc.h"
 #include "Board.h"
@@ -10,6 +9,7 @@
 #include "Pauline.h"
 #include "SmallGhost.h"
 
+// This function draws the character's icon on the board and saves the char that was there before it
 void Character::drawToBoard() {
 	if (!isDead) {
 		char currentBoardChar = board.getBoardChar(x, y);
@@ -35,17 +35,16 @@ void Character::drawToBoard() {
 	}
 }
 
+// This function prints the character's icon on the console and does nothing in silent mode or if it is dead
 void Character::drawToConsole() const {
 	if (board.isSilent())
 		return;
 
 	if (!isDead) {
 		gotoxy(x, y);
-		if (isColor) {
+		if (isColor)
 			std::cout << color << icon << RESET;
-		}
-		else { // Case: no color mode
+		else // Case: no color mode
 			std::cout << icon;
-		}
 	}
 }

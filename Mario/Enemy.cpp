@@ -7,6 +7,7 @@
 #include "Tiles.h"
 #include "Hammer.h"
 
+// This function returns true if the enemy's next position is inside the board and holds a char it can step into and false otherwise
 bool Enemy::isValidToMove() {
 	int nextPosX = x + currDirX;
 	int nextPosY = y + currDirY;

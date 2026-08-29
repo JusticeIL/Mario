@@ -2,6 +2,7 @@
 #include "Board.h"
 #include "Tiles.h"
 
+// This function looks for the closest ladder that leads towards Mario's floor with a clear path to it, and sets the ghost's direction to it, or straight towards Mario if no such ladder was found
 void BigGhost::searchMario() {
 	if (tryClimb()) // Case: climbing
 		return;
@@ -66,6 +67,7 @@ void BigGhost::searchMario() {
 	}
 }
 
+// This function sets the ghost's direction, going straight towards Mario when they share a floor with a clear path between them, and looking for a ladder to Mario otherwise
 void BigGhost::setDirection() { // "Sophisticated algorithm that tries to hunt Mario"
 	currDirX = 0;
 	currDirY = 0;
@@ -95,6 +97,7 @@ void BigGhost::setDirection() { // "Sophisticated algorithm that tries to hunt M
 	searchMario();
 }
 
+// This function returns true if the ghost is on a ladder, setting its direction to climb, and false otherwise
 bool BigGhost::tryClimb() {
 
 	if (y > marioY && onLadder) { // Case: Mario is above the ghost
@@ -111,6 +114,7 @@ bool BigGhost::tryClimb() {
 	return false; // Case: couldn't climb a ladder
 }
 
+// This function updates whether the ghost is currently on a ladder
 void BigGhost::updateState() {
 	char chBelowBelow = board.getBoardChar(x, y + 2); // Char below^2 Ghost
 	char chBelow = board.getBoardChar(x, y + 1);  // Char below Ghost
@@ -135,6 +139,7 @@ void BigGhost::updateState() {
 		onLadder = true;
 }
 
+// This function performs the big ghost's whole turn: erasing it from its old position, updating its state and direction, moving and drawing it again
 void BigGhost::move() {
 	calculatePrevPos();
 	eraseFromBoard();
@@ -148,6 +153,7 @@ void BigGhost::move() {
 	drawToConsole();
 }
 
+// This function returns true if the ghost's next position is inside the board and holds a char it can enter, and false otherwise
 bool BigGhost::isValidToMove() {
 	int nextPosX = x + currDirX;
 	int nextPosY = y + currDirY;
