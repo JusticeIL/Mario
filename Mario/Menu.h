@@ -29,21 +29,25 @@ class Menu {
 	static constexpr ScreenPos DIFFICULTY_POS = { 49, 7 };
     static constexpr ScreenPos OK_POS = { 60, 21 };
 
-	// Menu-related variables
+	// Menu state
     bool chosen;
 	char menuChar;
 	bool isArrow;
+    bool firstPrint;
+    
+	// Game settings
     bool isColor;
     Difficulty difficultyLevel;
-    bool firstPrint;
+
+    // Current level index
     int selectedLevelIndex;
 
-    // Menu and game state
+    // Game state
     GameManager gameManager;
     enum class GameState { MainMenu, Playing, SelectLevel, Instructions, Options, ConsoleLog, Pause, GameOver, GameWon, Exit };
     GameState state = GameState::MainMenu;
 
-    // Menu layout
+    // Screens
     std::string mainMenu =
         //01234567890123456789012345678901234567890123456789012345678901234567890123456789
         "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ\n" // 0
@@ -72,7 +76,6 @@ class Menu {
         "Q                                                                              Q\n" // 23
         "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"; // 24
 
-    // Screens
     std::string instructionsScreen =
         "Q==============================================================================Q\n"
         "Q                                                                              Q\n"
@@ -226,7 +229,7 @@ class Menu {
         "                                                                                \n"
         "                                                                                \n"
         "                                Congratulations!                                \n"
-        "                              ON TO THE NEXT STAGE!                             ";
+        "                                                                                ";
 
     std::string selectLevelScreen =
         "Q==============================================================================Q\n"
@@ -242,19 +245,23 @@ class Menu {
     void printPauseScreen() const { gotoxy(0, 0); std::cout << pauseScreen; }
 	void printGameOverScreen() const { gotoxy(0, 0); std::cout << gameOverScreen; }
 	void printGameWonScreen() const { gotoxy(0, 0); std::cout << gameWonScreen; }
-    char handleMenu();
-    void handleConsoleLogInput(size_t& currentErrorPage);
+    void printScreens();
     void printOKInGreen() const;
 
     // Menu Navigation
     void MoveArrow(char numKey) const;
     void resetAllArrows() const;
-    void handleSelectLevelInput(char pressedKey);
     void updateSelectLevelArrow(int oldIndex, int newIndex) const;
-    void ChangeisArrowChoice() { isArrow = true; }
-    void ResetMenu() { menuChar = '\0'; chosen = false; }
-    void printScreens();
+
+    // Input handling
+    char handleMenu();
+    void handleSelectLevelInput(char pressedKey);
+    void handleConsoleLogInput(size_t& currentErrorPage);
     void handleState();
+
+    // Menu state
+    void ChangeIsArrowChoice() { isArrow = true; }
+    void ResetMenu() { menuChar = '\0'; chosen = false; }
     void terminatePause() { clearScr(); firstPrint = true; }
 
     // Game Logic
@@ -262,23 +269,21 @@ class Menu {
     void gameWonLogic();
     void gameReset();
 
-    // Getters
-    bool GetMenuChoice() const { return chosen; }
-
     // Sound FX
     void playWinSound() const;
     void playLoseSound() const;
     void playExitSound() const;
 
+    // Getter
+    bool GetMenuChoice() const { return chosen; }
+
 public:
     Menu(Board& board, InputProvider* input, ConsoleRenderer* renderer, GameObserver* observer)
-	: gameManager(board, difficultyLevel, isColor, input, renderer, observer) { // Constructor
+	: isColor(false), difficultyLevel(Difficulty::Easy), gameManager(board, difficultyLevel, isColor, input, renderer, observer) { // Constructor
         chosen = false;
         menuChar = '\0';
         isArrow = false;
-		isColor = false;
         firstPrint = true;
-        difficultyLevel = Difficulty::Easy;
 		selectedLevelIndex = 0;
     }
 

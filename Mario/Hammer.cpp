@@ -124,13 +124,3 @@ void Hammer::eraseHammerCharsFromConsole(int radius) const {
 	else
 		std::cout << charToPrint;
 }
-
-// This function clears the hammer's swing data, its positions, its saved chars and its collected flag, and restores it to idle
-void Hammer::reset() {
-	std::memset(hammerPosX, -1, sizeof(hammerPosX)); // Reset to an invalid position
-	std::memset(prevHammerChars, Board::EMPTY, sizeof(prevHammerChars)); // Reset previous chars to empty
-
-	isCollected = false;
-	hammerPosY = -1;
-	state = HammerState::Idle;
-}

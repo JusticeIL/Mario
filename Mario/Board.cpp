@@ -6,12 +6,17 @@
 #include "HelperFunc.h"
 #include "Legend.h"
 #include "Tiles.h"
+#include "Barrel.h"
+#include "ExtraLife.h"
 
 using namespace std;
 
 // This function restores the board to the original level's layout using copy assignment, erasing everything the entities drew on it
 void Board::reset() {
-	gameBoard = currentOriginalLevel->getOriginalLevel();
+    if (!currentOriginalLevel)
+        throw std::runtime_error("Board::reset called before setLevel");
+
+    gameBoard = currentOriginalLevel->getOriginalLevel();
 }
 
 // This function prints the current state of the board
@@ -22,24 +27,8 @@ void Board::print(bool isColor, const Legend& legend) const {
 
     for (const string& line : gameBoard) {
 	    if (isColor)
-            for (char ch : line) {
-                if (ch == LADDER)
-                    std::cout << LADDER_COLOR << ch << RESET;
-                else if (ch == WALL || Tiles::isTile(ch))
-                    std::cout << TILES_COLOR << ch << RESET;
-                else if (ch == Barrel::BARREL_ICON)
-                    std::cout << Barrel::BARREL_COLOR << ch << RESET;
-                else if (ch == DonkeyKong::DONKEY_KONG_ICON)
-					std::cout << DonkeyKong::DONKEYKONG_COLOR << ch << RESET;
-                else if (ch == Pauline::PAULINE_ICON)
-					std::cout << Pauline::PAULINE_COLOR << ch << RESET;
-                else if (ch == Hammer::HAMMER_ICON)
-					std::cout << Hammer::HAMMER_COLOR << ch << RESET;
-                else if (ch == ExtraLife::EXTRA_LIFE_ICON)
-					std::cout << ExtraLife::EXTRA_LIFE_COLOR << ch << RESET;
-                else
-                    std::cout << ch;
-            }
+            for (char ch : line)
+                printCharWithColor(ch);
         else
             cout << line;
 
@@ -66,6 +55,8 @@ void Board::printCharWithColor(char ch) {
         std::cout << Pauline::PAULINE_COLOR << ch << RESET;
     else if (ch == Hammer::HAMMER_ICON)
         std::cout << Hammer::HAMMER_COLOR << ch << RESET;
+    else if (ch == ExtraLife::EXTRA_LIFE_ICON)
+        std::cout << ExtraLife::EXTRA_LIFE_COLOR << ch << RESET;
     else
         std::cout << ch;
 }
@@ -73,7 +64,7 @@ void Board::printCharWithColor(char ch) {
 // This function receives a position, and returns the char the board holds there, or a wall for a position outside the board and a floor for one below its bottom
 char Board::getBoardChar(int x, int y) const {
 	if (!isWithinBounds(x, y)) {
-		if (y >= GameManager::MAX_Y)
+		if (y >= Board::MAX_Y)
 			return Tiles::OUT_OF_BOUNDS_FALLBACK_FLOOR;
 
         return WALL;

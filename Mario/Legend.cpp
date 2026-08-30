@@ -1,5 +1,6 @@
 #include "Legend.h"
 #include <iostream>
+#include <cstring>
 #include <string>
 #include "Board.h"
 #include "HelperFunc.h"

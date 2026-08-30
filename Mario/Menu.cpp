@@ -3,6 +3,7 @@
 #include <conio.h>
 #include <vector>
 #include "Menu.h"
+#include "Board.h"
 #include "Colors.h"
 #include "Mario.h"
 #include "Pauline.h"
@@ -308,7 +309,7 @@ void Menu::printConsoleLogScreen(size_t currentErrorPage) {
 	// 2. Handle perfect loads (no errors)
 	if (errorLog.empty()) {
 		const std::string successMsg = "No errors found! All screens loaded successfully.";
-		int startX = (GameManager::MAX_X - static_cast<int>(successMsg.length())) / 2;
+		int startX = (Board::MAX_X - static_cast<int>(successMsg.length())) / 2;
 		gotoxy(startX, 10);
 		std::cout << GREEN << successMsg << RESET;
 	}
@@ -325,7 +326,7 @@ void Menu::printConsoleLogScreen(size_t currentErrorPage) {
 
 		// Print the title at line 5, exactly in the middle.
 		// Assuming the title length is 15 exactly (e.g. "dkong_01.screen")
-		int titleStartX = (GameManager::MAX_X - 15) / 2;
+		int titleStartX = (Board::MAX_X - 15) / 2;
 		gotoxy(titleStartX, 5);
 		std::cout << currentPageData.first;
 
@@ -352,7 +353,7 @@ void Menu::printConsoleLogScreen(size_t currentErrorPage) {
 				maxLength = line.length();
 		}
 
-		int startX = (GameManager::MAX_X - static_cast<int>(maxLength)) / 2;
+		int startX = (Board::MAX_X - static_cast<int>(maxLength)) / 2;
 		if (startX < 2) // Case: error string is too long
 			startX = 2;
 

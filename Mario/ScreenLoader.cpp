@@ -106,19 +106,19 @@ Level* ScreenLoader::TryLoadLevel(const std::string& fileName) {
         }
 
         std::string padded_line = line;
-        if (padded_line.length() < GameManager::MAX_X)
-            padded_line.append(GameManager::MAX_X - padded_line.length(), Board::EMPTY);
+        if (padded_line.length() < Board::MAX_X)
+            padded_line.append(Board::MAX_X - padded_line.length(), Board::EMPTY);
         
-        else if (padded_line.length() > GameManager::MAX_X) 
-            padded_line = padded_line.substr(0, GameManager::MAX_X); // Cut off extra characters
+        else if (padded_line.length() > Board::MAX_X) 
+            padded_line = padded_line.substr(0, Board::MAX_X); // Cut off extra characters
         
         lvl.emplace_back(padded_line);
         row++;
     }
 
     // If the file had fewer rows than MAX_Y, fill the rest of the board with empty strings.
-    while (row < GameManager::MAX_Y) {
-        lvl.emplace_back(std::string(GameManager::MAX_X, Board::EMPTY));
+    while (row < Board::MAX_Y) {
+        lvl.emplace_back(std::string(Board::MAX_X, Board::EMPTY));
         row++;
     }
 
@@ -166,5 +166,6 @@ Level* ScreenLoader::TryLoadLevel(const std::string& fileName) {
         throw std::invalid_argument(errorString);
     }
 
-	return new Level(fileName, lvl, marioSpawn, donkeyKongSpawn, paulineSpawn, legendPosition, ghostsSpawns, hammerSpawn, extraLifeSpawns);
+    return new Level(fileName, std::move(lvl), marioSpawn, donkeyKongSpawn, paulineSpawn, legendPosition,
+        std::move(ghostsSpawns), hammerSpawn, std::move(extraLifeSpawns));
 }

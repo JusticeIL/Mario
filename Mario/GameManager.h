@@ -27,8 +27,7 @@ class GameManager {
     // Constants
     static constexpr unsigned int MAX_INIT_SCORE = 10000;
 
-    // Data Members
-    bool& isColor;
+    // Data members
     int ticks;
     unsigned int score;
     unsigned int logicalRefreshRateMs;
@@ -36,78 +35,77 @@ class GameManager {
     bool singleLevelMode;
     unsigned int currentLevelSeed;
 
+    // Game settings
+    bool& isColor;
+    const Difficulty& difficultyLevel;
+
     // References to game objects
-    ScreenLoader screenLoader;
     Board& board;
     Mario* mario;
     Pauline* pauline;
     DonkeyKong* donkeyKong;
-    Hammer* uncollectedHammer;
-    std::list<ExtraLife*> uncollectedExtraLives;
     Legend* legend;
+
+	// Enemy management
     std::list<Barrel> barrels;
     std::vector<std::unique_ptr<Ghost>> ghosts;
+
+    // Item management
+    Hammer* uncollectedHammer;
+    std::list<ExtraLife*> uncollectedExtraLives;
+
+    // Level management
+    ScreenLoader screenLoader;
     std::list<Level*> levels;
     std::list<Level*>::iterator currentLevel;
+    std::unordered_map<std::string, std::string> error_log;
 
     // Load and save management
     InputProvider* inputProvider;
     ConsoleRenderer* renderer;
     GameObserver* observer;
 
-    // Mario Damage Management
+    // Mario damage management
     enum class DamageSource { None, Barrel, Ghost, DonkeyKong, Fall };
     struct MarioDamageReport {
         const Enemy* sourceEntity = nullptr; // nullptr for Fall or None
         DamageSource source = DamageSource::None;
     };
 
-    // Game State Management
-    const Difficulty& difficultyLevel;
-    std::unordered_map<std::string, std::string> error_log;
-
-    // Level management
+    // Level setup
+    void setupNewLevel();
     void prepareLevelData();
 
-    // Score Management
+    // Score management
     void manageScore();
     void addScore(int points);
     void triggerLegendBump();
-    
-    // Enemies
-    void resetEnemies();
 
-    // Game state
-    bool checkWinCondition() const;
-
-	// Mario life and death handling
+	// Entity initialization
     void initializeMario(const Level& level);
-    MarioDamageReport checkIfMarioHit() const;
-    void handleMarioDeath();
- 
-	// Donkey kong management
-    void initializeDonkeyKong(const Level& level);
-    void donkeyKongThrowsNewBarrel();
-
-	// Pauline management
     void initializePauline(const Level& level);
-
-    // Barrels management
-    void updateBarrels();
-
-    // Ghosts management
-    void readGhosts(const Level& level, unsigned int seed);
-    void updateGhosts();
-
-    // Hammer management
+    void initializeDonkeyKong(const Level& level);
     void initializeHammer(const Level& level);
-
-	// Extra life management
+    void readGhosts(const Level& level, unsigned int seed);
     void readExtraLives(const Level& level);
+
+    // Per-tick updates
+    void donkeyKongThrowsNewBarrel();
+    void updateBarrels();
+    void updateGhosts();
     void tryCollectExtraLives();
 
-    // Memory management
+    // Mario hit detection
+    MarioDamageReport checkIfMarioHit() const;
+    void handleMarioDeath();
+
+    // Win condition
+    bool checkWinCondition() const;
+
+    // Reset & cleanup
+    void resetEnemies();
     void clearAllEntities();
+    void clearAllLevels();
 
 public:
     GameManager(Board& B, const Difficulty& difficulty, bool& isColor, InputProvider* input, ConsoleRenderer* renderer, GameObserver* observer)
@@ -127,23 +125,16 @@ public:
 
 	~GameManager(); // Destructor
 
-    // Constants
-    static constexpr int MAX_X = 80;
-    static constexpr int MAX_Y = 25;
-    static constexpr int MIN_X = 0;
-    static constexpr int MIN_Y = 0;
-
-    // Game Flow & State Management
-    void setupNewLevel();
+    // Game flow & state management
+    void loadAllScreens();
     void startNewGame();
-    bool hasLevels() const { return !levels.empty(); }
-    const std::list<Level*>& getLevels() const { return levels; }
     void startSpecificLevel(const std::string& filename);
     enum class GameResult { InProgress, Won, Lost, Paused, QuitToMenu };
     GameResult playGame();
-    void loadAllScreens();
 
-    // Error handling
+	// Getters
+    bool hasLevels() const { return !levels.empty(); }
+    const std::list<Level*>& getLevels() const { return levels; }
     const std::unordered_map<std::string, std::string>& getErrorLog() const { return error_log; }
     
     // Setters

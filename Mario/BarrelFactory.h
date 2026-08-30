@@ -5,13 +5,19 @@
 class Board;
 
 class BarrelFactory {
+	// References to other objects
+	Board& board;
 
+	// Reference to the color mode
 	bool& isColor;
+
+	// Spawn point
 	int creationPosX;
 	int creationPosY;
-	Board& board;
 
 public:
 	BarrelFactory(int dkx, int dky, Board& b, bool& isColor); // Constructor
-	Barrel* spawnBarrel() const { return new Barrel(creationPosX, creationPosY, board, isColor); }
+
+	// Barrel creation
+	Barrel spawnBarrel() const { return Barrel(creationPosX, creationPosY, board, isColor); }
 };

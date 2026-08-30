@@ -229,7 +229,7 @@ void Barrel::setDirection() {
 
 // This function moves the barrel one step down while counting the fall's height, starts an explosion after a fall of 8 rows, and returns it to rolling when it lands on a floor
 void Barrel::fall() {
-	if (fallCounter >= 8 && (!isOnAir || y == (GameManager::MAX_Y - 1))) {
+	if (fallCounter >= 8 && (!isOnAir || y == (Board::MAX_Y - 1))) {
 		startExplode();
 		return;
 	}

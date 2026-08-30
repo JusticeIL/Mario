@@ -233,6 +233,13 @@ void GameManager::clearAllEntities() {
 	ghosts.clear();
 }
 
+void GameManager::clearAllLevels() {
+	for (Level* level : levels)
+		delete level;
+
+	levels.clear();
+}
+
 // This function lowers the score by one every fixed amount of ticks, calculated from the refresh rate, and refreshes the legend
 void GameManager::manageScore() {
 	int tickThreshold = static_cast<int>(logicalRefreshRateMs * -0.35 + 57.5);
@@ -460,12 +467,24 @@ void GameManager::setupNewLevel() {
 
 // This function adds a new barrel created by Donkey Kong to the barrels list
 void GameManager::donkeyKongThrowsNewBarrel() {
-	barrels.push_back(*donkeyKong->createBarrel());
+	barrels.push_back(donkeyKong->createBarrel());
 }
 
 // This function loads every valid screen file into the levels list, and stores in the error log the error message of each file that failed to load
 void GameManager::loadAllScreens() {
-	for (const auto& filename : screenLoader.getScreenFileNames()) {
+	clearAllLevels();
+	error_log.clear();
+
+	std::list<std::string> fileNames;
+	try {
+		fileNames = screenLoader.getScreenFileNames();
+	}
+	catch (const std::exception& e) {
+		error_log["<directory>"] = e.what();
+		return;
+	}
+
+	for (const auto& filename : fileNames) {
 		try {
 			levels.push_back(screenLoader.TryLoadLevel(filename));
 		}

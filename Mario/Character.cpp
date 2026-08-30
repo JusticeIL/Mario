@@ -7,7 +7,9 @@
 #include "DonkeyKong.h"
 #include "Mario.h"
 #include "Pauline.h"
+#include "Barrel.h"
 #include "SmallGhost.h"
+#include "Hammer.h"
 
 // This function draws the character's icon on the board and saves the char that was there before it
 void Character::drawToBoard() {

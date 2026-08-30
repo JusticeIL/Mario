@@ -3,7 +3,6 @@
 #include "Colors.h"
 
 class ExtraLife : public Item {
-
 public:
 	ExtraLife(int x, int y, Board& b, bool& isColor) : Item(x, y, EXTRA_LIFE_ICON, EXTRA_LIFE_COLOR, b, isColor) {} // Constructor
 
@@ -14,7 +13,7 @@ public:
 	// Behavior
 	bool checkIfMarioPickedUpLife(int marioX, int marioY);
 
-	// Print methods
+	// Drawing
 	void drawToConsole() const override { Item::drawToConsole(); }
 	void drawToBoard() override { Item::drawToBoard(); }
 };

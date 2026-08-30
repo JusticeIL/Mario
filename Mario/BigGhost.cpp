@@ -18,7 +18,7 @@ void BigGhost::searchMario() {
 
 	int targetLadderX = -1;
 
-	for (int i = GameManager::MIN_X; i < GameManager::MAX_X; ++i) { // Go over current floor level
+	for (int i = Board::MIN_X; i < Board::MAX_X; ++i) { // Go over current floor level
 		char curr = board.getBoardChar(i, y);
 		char belowBelow = board.getBoardChar(i, y + 2);
 		char above = board.getBoardChar(i, y - 1);

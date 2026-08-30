@@ -1,8 +1,7 @@
 #include "BarrelFactory.h"
-#include "GameManager.h"
 #include "Board.h"
 
-BarrelFactory::BarrelFactory(int dkx, int dky, Board& b, bool& isColor) : isColor(isColor), board(b) { // Constructor
+BarrelFactory::BarrelFactory(int dkx, int dky, Board& b, bool& isColor) : board(b), isColor(isColor) { // Constructor
 	if (board.isWithinBounds(dkx + 1, dky) && board.getBoardChar(dkx + 1, dky) == Board::EMPTY) { // Case: initialize barrel spawn direction to right (if possible)
 		creationPosX = dkx + 1;
 		creationPosY = dky;
@@ -16,7 +15,7 @@ BarrelFactory::BarrelFactory(int dkx, int dky, Board& b, bool& isColor) : isColo
 		creationPosY = dky + 1;
 	}
 	else { // Case: No valid spawn point, therefore set invalid spawn point
-		creationPosX = GameManager::MIN_X - 1;
-		creationPosY = GameManager::MIN_Y - 1;
+		creationPosX = Board::MIN_X - 1;
+		creationPosY = Board::MIN_Y - 1;
 	}
 }
