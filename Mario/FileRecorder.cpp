@@ -2,8 +2,10 @@
 #include "HelperFunc.h"
 #include "Pauline.h"
 
+using std::string;
+
 // This function receives the level's name, seed and refresh rate, and opens fresh steps and result files for it, writing the seed and the refresh rate as the first line of the steps file
-void FileRecorder::onLevelStart(const std::string& levelName, unsigned int seed, unsigned int refreshRateMs) {
+void FileRecorder::onLevelStart(const string& levelName, unsigned int seed, unsigned int refreshRateMs) {
     // 1. Close files from previous level (if any are still open)
     if (stepsFile.is_open())
         stepsFile.close();
@@ -12,7 +14,7 @@ void FileRecorder::onLevelStart(const std::string& levelName, unsigned int seed,
         resultFile.close();
 
     // 2. Extract base name (e.g. "dkong_01.screen" -> "dkong_01")
-    std::string baseName = getBaseName(levelName);
+    string baseName = getBaseName(levelName);
     if (baseName.empty())
         throw std::runtime_error("Invalid level name: " + levelName);
     

@@ -11,15 +11,19 @@
 #include "Hammer.h"
 #include "Tiles.h"
 
+using std::list;
+using std::string;
+using std::vector;
 using point = std::pair<int, int>;
-// This function returns a sorted list of the names of all the valid screen files found in the game's directory
-std::list<std::string> ScreenLoader::getScreenFileNames() {
-    namespace fs = std::filesystem;
-    std::list<std::string> FilesFromFolder;
 
-    const std::string& directory = "./";
+// This function returns a sorted list of the names of all the valid screen files found in the game's directory
+list<string> ScreenLoader::getScreenFileNames() {
+    namespace fs = std::filesystem;
+    list<string> FilesFromFolder;
+
+    const string& directory = "./";
     for (const auto& File : fs::directory_iterator(directory)) {
-        std::string filename = File.path().filename().string();
+        string filename = File.path().filename().string();
         if (isFileNameValid(filename))
         	FilesFromFolder.push_back(filename);
     }
@@ -30,14 +34,14 @@ std::list<std::string> ScreenLoader::getScreenFileNames() {
 }
 
 // This function receives a screen file's name, and returns a new level built from it, and throws an exception listing the missing or duplicated components if the file is invalid
-Level* ScreenLoader::TryLoadLevel(const std::string& fileName) {
+Level* ScreenLoader::TryLoadLevel(const string& fileName) {
 
 	std::ifstream file(fileName);
 
 	if (!file.is_open())
         throw std::runtime_error("Error: Could not open file " + fileName + ".");
 
-    std::vector<std::string> lvl;
+    vector<string> lvl;
 
     unsigned int marioCount = 0;
 	unsigned int paulineCount = 0;
@@ -53,9 +57,9 @@ Level* ScreenLoader::TryLoadLevel(const std::string& fileName) {
     point hammerSpawn(-1, -1);
     point legendPosition(-1, -1);
 
-    std::list<point> ghostsSpawns;
-    std::list<point> extraLifeSpawns;
-    std::string line;
+    list<point> ghostsSpawns;
+    list<point> extraLifeSpawns;
+    string line;
     size_t row = 0;
 
     while (getline(file, line)) {
@@ -105,7 +109,7 @@ Level* ScreenLoader::TryLoadLevel(const std::string& fileName) {
             }
         }
 
-        std::string padded_line = line;
+        string padded_line = line;
         if (padded_line.length() < Board::MAX_X)
             padded_line.append(Board::MAX_X - padded_line.length(), Board::EMPTY);
         
@@ -118,49 +122,49 @@ Level* ScreenLoader::TryLoadLevel(const std::string& fileName) {
 
     // If the file had fewer rows than MAX_Y, fill the rest of the board with empty strings.
     while (row < Board::MAX_Y) {
-        lvl.emplace_back(std::string(Board::MAX_X, Board::EMPTY));
+        lvl.emplace_back(string(Board::MAX_X, Board::EMPTY));
         row++;
     }
 
     if (marioCount != 1 || paulineCount != 1 || donkeyKongCount != 1 || legendCount != 1) {
-        std::string errorString;
+        string errorString;
 
         if (marioCount != 1) {
 	        if (marioCount < 1)
-                errorString += std::string("Error: No mario detected.") + "\n";
+                errorString += string("Error: No mario detected.") + "\n";
             else if (marioCount > 1) 
-                errorString += std::string("Error: Too many marios detected (Required 1 but detected ") + std::to_string(marioCount) + ")." + "\n";
+                errorString += string("Error: Too many marios detected (Required 1 but detected ") + std::to_string(marioCount) + ")." + "\n";
         }
 
         if (paulineCount != 1) {
 	        if (paulineCount < 1) 
-                errorString += std::string("Error: No Pauline detected.") + "\n";
+                errorString += string("Error: No Pauline detected.") + "\n";
 	        else if (paulineCount > 1) 
-                errorString += std::string("Error: Too many Paulines detected (Required 1 but detected ") + std::to_string(paulineCount) + ")." + "\n";
+                errorString += string("Error: Too many Paulines detected (Required 1 but detected ") + std::to_string(paulineCount) + ")." + "\n";
         }
 
 		if (donkeyKongCount != 1) {
 	        if (donkeyKongCount < 1) 
-                errorString += std::string("Error: No Donkey Kong detected.") + "\n";
+                errorString += string("Error: No Donkey Kong detected.") + "\n";
             else if (donkeyKongCount > 1) 
-                errorString += std::string("Error: Too many Donkey Kongs detected (Required 1 but detected ") + std::to_string(donkeyKongCount) + ")." + "\n";
+                errorString += string("Error: Too many Donkey Kongs detected (Required 1 but detected ") + std::to_string(donkeyKongCount) + ")." + "\n";
         }
 
         if (legendCount != 1) {
             if (legendCount < 1) 
-                errorString += std::string("Error: No Legend position detected.") + "\n";
+                errorString += string("Error: No Legend position detected.") + "\n";
             else if (legendCount > 1)
                 errorString += "Error: Too many Legend positions detected (Required 1 but detected " + std::to_string(legendCount) + ")." + "\n";
         }
 
         if (!hasTile) 
-            errorString += std::string("Error: No tile detected.") + "\n";
+            errorString += string("Error: No tile detected.") + "\n";
 
         if (!hasWall)
-	        errorString += std::string("Error: No wall detected.") + "\n";
+	        errorString += string("Error: No wall detected.") + "\n";
 
         if (!hasLadder)
-            errorString += std::string("Error: No ladder detected.") + "\n";
+            errorString += string("Error: No ladder detected.") + "\n";
 
         errorString.pop_back(); // Remove last new line character
         throw std::invalid_argument(errorString);

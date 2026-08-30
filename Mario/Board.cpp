@@ -9,7 +9,7 @@
 #include "Barrel.h"
 #include "ExtraLife.h"
 
-using namespace std;
+using std::string;
 
 // This function restores the board to the original level's layout using copy assignment, erasing everything the entities drew on it
 void Board::reset() {
@@ -30,10 +30,10 @@ void Board::print(bool isColor, const Legend& legend) const {
             for (char ch : line)
                 printCharWithColor(ch);
         else
-            cout << line;
+            std::cout << line;
 
         if (++currentIndex < totalLines)
-            std::cout << endl;
+            std::cout << std::endl;
     }
 
     legend.drawToConsole();

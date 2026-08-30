@@ -10,6 +10,9 @@
 #include "Legend.h"
 #include "ConsoleRenderer.h"
 
+using std::list;
+using std::string;
+
 // This function frees every object the manager allocated: the levels list, the uncollected extra lives, Mario, Pauline, Donkey Kong, the hammer and the legend
 GameManager::~GameManager() { // Destructor
 	// Cleaning the levels list before exiting the game to avoid memory leaks
@@ -406,7 +409,7 @@ void GameManager::prepareLevelData() {
 	board.setLevel(*currentLevel);
 
 	// Load the level input data from the input provider
-	std::string currentFilename = (*currentLevel)->getFilename();
+	string currentFilename = (*currentLevel)->getFilename();
 	inputProvider->loadLevelInput(currentFilename);
 	currentLevelSeed = inputProvider->getSeed();
 	unsigned int fileMs = inputProvider->getRefreshRate();
@@ -432,7 +435,7 @@ void GameManager::prepareLevelData() {
 }
 
 // This function receives the name of the screen file to play, starts a single level chosen from the menu by name and restores Mario's lives before loading it
-void GameManager::startSpecificLevel(const std::string& filename) {
+void GameManager::startSpecificLevel(const string& filename) {
 	if (levels.empty()) // Case: no levels are loaded at all
 		return;
 
@@ -475,7 +478,7 @@ void GameManager::loadAllScreens() {
 	clearAllLevels();
 	error_log.clear();
 
-	std::list<std::string> fileNames;
+	list<string> fileNames;
 	try {
 		fileNames = screenLoader.getScreenFileNames();
 	}

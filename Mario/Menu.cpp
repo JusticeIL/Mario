@@ -8,6 +8,9 @@
 #include "Mario.h"
 #include "Pauline.h"
 
+using std::string;
+using std::vector;
+
 // This function manages the main game loop, handles transitions between different game states, and coordinates user inputs and game actions
 void Menu::run() {
 
@@ -224,7 +227,7 @@ void Menu::handleState() {
 				else if (pressedKey == '7') {
 					difficultyLevel = (difficultyLevel == Difficulty::Easy) ? Difficulty::Hard : Difficulty::Easy; // Toggle difficulty level
 					gotoxy(DIFFICULTY_POS.x, DIFFICULTY_POS.y);
-					std::cout << std::string(10, ' '); // Clear message
+					std::cout << string(10, ' '); // Clear message
 					gotoxy(DIFFICULTY_POS.x, DIFFICULTY_POS.y);
 					std::cout << (difficultyLevel == Difficulty::Easy ? "Easy" : "Hard");
 					gameManager.setDelayTimer((difficultyLevel == Difficulty::Hard) ? 50 : 150);
@@ -246,7 +249,7 @@ void Menu::handleState() {
 		if (messageOnScreen && GetTickCount() - messageTimestamp >= 2000)
 		{
 			gotoxy(27, 10);
-			std::cout << std::string(30, ' '); // Clear message
+			std::cout << string(30, ' '); // Clear message
 			messageOnScreen = false;
 		}
 	}
@@ -298,7 +301,7 @@ void Menu::printInstructionsScreen() const {
 // This function receives the current page number, and prints the errors of the matching screen file centered on the log screen, or a success message if no file failed to load
 void Menu::printConsoleLogScreen(size_t currentErrorPage) {
 	// 1. Clean the inner screen (using ' ' to wipe previous messages)
-	std::string blankLine(76, ' ');
+	string blankLine(76, ' ');
 	for (int i = 5; i <= 20; ++i) {
 		gotoxy(2, i);
 		std::cout << blankLine;
@@ -308,14 +311,14 @@ void Menu::printConsoleLogScreen(size_t currentErrorPage) {
 
 	// 2. Handle perfect loads (no errors)
 	if (errorLog.empty()) {
-		const std::string successMsg = "No errors found! All screens loaded successfully.";
+		const string successMsg = "No errors found! All screens loaded successfully.";
 		int startX = (Board::MAX_X - static_cast<int>(successMsg.length())) / 2;
 		gotoxy(startX, 10);
 		std::cout << GREEN << successMsg << RESET;
 	}
 	else {
 		// 3. Convert unordered_map to a vector to index pages
-		std::vector<std::pair<std::string, std::string>> pages(errorLog.begin(), errorLog.end());
+		vector<std::pair<string, string>> pages(errorLog.begin(), errorLog.end());
 
 		size_t safePage = currentErrorPage;
 
@@ -331,13 +334,13 @@ void Menu::printConsoleLogScreen(size_t currentErrorPage) {
 		std::cout << currentPageData.first;
 
 		// 4. Format the text for the CURRENT page dynamically
-		std::vector<std::string> displayLines;
-		const std::string& errors = currentPageData.second;
+		vector<string> displayLines;
+		const string& errors = currentPageData.second;
 		size_t startPos = 0;
 		size_t newlinePos = errors.find('\n');
 
 		// Slice up to the newline characters
-		while (newlinePos != std::string::npos) {
+		while (newlinePos != string::npos) {
 			displayLines.push_back(errors.substr(startPos, newlinePos - startPos));
 			startPos = newlinePos + 1;
 			newlinePos = errors.find('\n', startPos);
@@ -348,7 +351,7 @@ void Menu::printConsoleLogScreen(size_t currentErrorPage) {
 
 		// 5. Find the absolute longest line to calculate dead-center alignment
 		size_t maxLength = 0;
-		for (const std::string& line : displayLines) {
+		for (const string& line : displayLines) {
 			if (line.length() > maxLength)
 				maxLength = line.length();
 		}
@@ -360,7 +363,7 @@ void Menu::printConsoleLogScreen(size_t currentErrorPage) {
 		// 6. Print the aligned block starting from line 7
 		int currentY = 7;
 		std::cout << RED;
-		for (const std::string& line : displayLines) {
+		for (const string& line : displayLines) {
 			if (currentY >= 20) {
 				gotoxy(startX, currentY);
 				std::cout << RESET;

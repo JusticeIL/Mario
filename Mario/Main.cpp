@@ -9,6 +9,8 @@
 #include "FileVerifier.h"
 #include "GameManager.h"
 
+using std::string;
+
 int main(int argc, char* argv[]) {
 	ShowConsoleCursor(false);
 
@@ -43,8 +45,8 @@ int main(int argc, char* argv[]) {
 			clearScr();
 
 			if (isSilent) {
-				std::string passMsg1 = "Test Passed:";
-				std::string passMsg2 = "All results matched the expected output!";
+				string passMsg1 = "Test Passed:";
+				string passMsg2 = "All results matched the expected output!";
 
 				int startX1 = (Board::MAX_X - static_cast<int>(passMsg1.length())) / 2;
 				int startX2 = (Board::MAX_X - static_cast<int>(passMsg2.length())) / 2;
@@ -58,7 +60,7 @@ int main(int argc, char* argv[]) {
 		}
 		catch (const std::exception& e) {
 			if (isSilent) {
-				std::string errMsg = e.what();
+				string errMsg = e.what();
 				int startX = (Board::MAX_X - static_cast<int>(errMsg.length())) / 2;
 				int startY = Board::MAX_Y / 2;
 				

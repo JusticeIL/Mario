@@ -5,12 +5,14 @@
 #include "Board.h"
 #include "HelperFunc.h"
 
+using std::string;
+
 // This function clears the whole legend area on the console
 void Legend::wipeOldLegendArea() const {
 	int lineIndex = startY;
 	while (lineIndex <= endY) {
 		gotoxy(startX, lineIndex);
-		std::cout << std::string(endX - startX + 1, Board::EMPTY); // Clear the line
+		std::cout << string(endX - startX + 1, Board::EMPTY); // Clear the line
 
 		++lineIndex;
 	}
