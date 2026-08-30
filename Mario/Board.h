@@ -5,18 +5,27 @@
 #include "Level.h"
 
 class Board {
+	// Constants
+	static constexpr const char* LADDER_COLOR = CYAN;
+	static constexpr const char* WALL_COLOR = PINK;
+	static constexpr const char* TILES_COLOR = PINK;
 
-	const Level* currentOriginalLevel;
+	// Level data
+	const Level* currentOriginalLevel = nullptr;
 	std::vector<std::string> gameBoard;
+
+	// Silent mode
 	bool silentMode = false;
 
 public:
+	// Constants
+	static constexpr int MIN_X = 0;
+	static constexpr int MIN_Y = 0;
+	static constexpr int MAX_X = 80;
+	static constexpr int MAX_Y = 25;
 	static constexpr char LADDER = 'H';
-	static constexpr const char* LADDER_COLOR = CYAN;
 	static constexpr char EMPTY = ' ';
 	static constexpr char WALL = 'Q';
-	static constexpr const char* WALL_COLOR = PINK;
-	static constexpr const char* TILES_COLOR = PINK;
 
 	// Board state
 	void reset();
@@ -24,15 +33,17 @@ public:
 	static void printCharWithColor(char ch);
 
 	// Edge case handling
-	bool isWithinBounds(int x, int y) const { return (GameManager::MIN_X <= x && x < GameManager::MAX_X && GameManager::MIN_Y <= y && y < GameManager::MAX_Y); }
-
-	// Getters & Setters
-	char getBoardChar(int x, int y) const;
-	void setBoardChar(int x, int y, char ch);
-	Level getLevel() { return *currentOriginalLevel; }
-	void setLevel(const Level* newLevel);
+	bool isWithinBounds(int x, int y) const { return (MIN_X <= x && x < MAX_X && MIN_Y <= y && y < MAX_Y); }
 
 	// Silent handling
 	void setSilent(bool silent) { silentMode = silent; }
 	bool isSilent() const { return silentMode; }
+
+	// Getters & Setters
+	char getBoardChar(int x, int y) const;
+	const Level& getLevel() const { return *currentOriginalLevel; }
+
+	// Setters
+	void setBoardChar(int x, int y, char ch);
+	void setLevel(const Level* newLevel);
 };

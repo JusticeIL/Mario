@@ -7,8 +7,9 @@
 #include "SmallGhost.h"
 #include "BigGhost.h"
 #include "DonkeyKong.h"
-#include "Legend.h"
+#include "ExtraLife.h"
 
+// This function receives the key that was pressed and sets Mario's direction based on the key if it is one of the valid movement keys, or sets "stay" otherwise
 void Mario::setPressedKey(char key) {
 	canJump = true;
 
@@ -37,6 +38,7 @@ void Mario::setPressedKey(char key) {
 	}
 }
 
+// This function sets Mario's direction according to the pressed key and his current state, while jumping, falling and swinging the hammer override the key
 void Mario::tryMove() {
 
 	if (falling)
@@ -90,15 +92,18 @@ void Mario::tryMove() {
 	}
 }
 
+// This function updates Mario's state, determining whether he is on the ground, on a ladder, jumping or falling
 void Mario::updateState() {
 	char chBelow = board.getBoardChar(x, y + 1);
 	char chAbove = board.getBoardChar(x, y - 1);
 	bool wasOnLadder = onLadder;
+	bool isLadderBelow = (chBelow == Board::LADDER) ||
+		(board.isWithinBounds(x, y + 1) && board.getLevel().getOriginalLevel()[y + 1][x] == Board::LADDER);
 
 	// 1. Update environment & gravity
-	if (chBelow == Board::EMPTY || chBelow == Hammer::HAMMER_ICON || chBelow == Pauline::PAULINE_ICON ||
+	if (!isLadderBelow && (chBelow == Board::EMPTY || chBelow == Hammer::HAMMER_ICON || chBelow == Pauline::PAULINE_ICON ||
 		chBelow == SmallGhost::SMALL_GHOST_ICON || chBelow == BigGhost::BIG_GHOST_ICON ||
-		chBelow == Barrel::BARREL_ICON || chBelow == DonkeyKong::DONKEY_KONG_ICON) { // Case: Mario is falling or jumping
+		chBelow == Barrel::BARREL_ICON || chBelow == DonkeyKong::DONKEY_KONG_ICON)) { // Case: Mario is falling or jumping
 		isOnGround = false;
 		onLadder = false;
 		if (!jumping) 
@@ -162,7 +167,8 @@ void Mario::updateState() {
 	}
 }
 
-bool Mario::isValidToMove() {
+// This function returns true if Mario's next position is inside the board and holds a char he is allowed to enter and false otherwise
+bool Mario::isValidToMove() const {
 	int nextPosX = x + currDirX; // Direction in x axis
 	int nextPosY = y + currDirY; // Direction in y axis
 
@@ -214,6 +220,7 @@ bool Mario::isValidToMove() {
 	}
 }
 
+// This function performs Mario's whole turn: erasing him from his old position, updating his state and direction, killing him after a too long fall, and drawing him again
 void Mario::move() {
 	if (hasHammer() && pressedKey == Key::PlayHammer)
 		useHammer();
@@ -264,6 +271,7 @@ void Mario::move() {
 		hammer->updateState();
 }
 
+// This function moves Mario one step down while counting the fall's height, and stops the fall when he lands on a floor, a wall or the bottom of the board
 void Mario::fall() {
 	// Update direction to fall
 	currDirY = 1;
@@ -298,6 +306,7 @@ void Mario::fall() {
 	}
 }
 
+// This function makes Mario jump up, optionally moving left or right if a horizontal key is pressed until he reaches the maximum jump height, and turns the jump into a fall when he bumps into a floor, a wall or an enemy
 void Mario::jump() {
 	currDirY = -1;
 
@@ -329,6 +338,7 @@ void Mario::jump() {
 	}
 }
 
+// This function starts a hammer swing at Mario's position and direction
 void Mario::useHammer() {
 	if (hammer == nullptr)
 		return;
@@ -339,6 +349,7 @@ void Mario::useHammer() {
 		pressedKey = Key::Init; // Reset pressed key after using the hammer
 }
 
+// This function returns Mario to his spawn point and clears his state
 void Mario::reset() {
 	// Reset position
 	resetDir();
@@ -366,28 +377,32 @@ void Mario::reset() {
 	isDead = false;
 }
 
+// This function adds one life to Mario and clears the extra life char he stepped on
 void Mario::pickUpLife() {
 	++life;
 	prevCh = Board::EMPTY;
 }
 
+// This function receives the level's uncollected hammer, and takes it if Mario stands on it, or deletes it if he already holds one, while removing it from the board either way
 void Mario::tryPickUpHammer(Hammer*& uncollectedHammer) {
 	if (uncollectedHammer != nullptr) {
 		if (uncollectedHammer->getX() == x && uncollectedHammer->getY() == y) {
-			if (!hasHammer()) 
+			if (!hasHammer())
 				pickUpHammer(uncollectedHammer);
 			else {
 				delete uncollectedHammer;
 				prevCh = Board::EMPTY; // Clear Mario's footprint so he doesn't leave a ghost hammer behind
 			}
+
 			uncollectedHammer = nullptr; // Remove the hammer from the board
 		}
 	}
 }
 
+// This function receives a hammer and makes Mario pick up the hammer
 void Mario::pickUpHammer(Hammer* h) {
 	hammer = h;
-	hammer->setCollected();
+	hammer->marioPickedUp();
 	icon = MARIO_HAMMER_ICON;
 	prevCh = Board::EMPTY;
 }

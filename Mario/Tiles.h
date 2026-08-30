@@ -1,14 +1,17 @@
 #pragma once
-#include <array>
 #include <algorithm> // for std::find
+#include <array>
 
 class Tiles {
-
+	// Constant
 	static constexpr std::array<char, 3> tiles = {'<', '=', '>'};
-	const bool& isColor;
 
 public:
-	Tiles(bool& isColor) : isColor(isColor) {}
-	static bool isTile(char ch) { return std::find(tiles.begin(), tiles.end(), ch) != tiles.end(); }
+	Tiles() = delete; // Constructor
+
+	// Constant
 	static constexpr char OUT_OF_BOUNDS_FALLBACK_FLOOR = tiles[1];
+
+	// Tile verifier
+	static bool isTile(char ch) { return std::ranges::find(tiles, ch) != tiles.end(); }
 };

@@ -9,6 +9,7 @@
 #include "Colors.h"
 #include "Tiles.h"
 
+// This function receives Mario's position, the direction he faces and a flag pointer, starts a swing at the two cells in front of him, and reports through the flag whether the swing actually started
 void Hammer::use(int marioX, int marioY, int xDirection, bool* hammerUsed) {
 	*hammerUsed = true;
 
@@ -31,6 +32,7 @@ void Hammer::use(int marioX, int marioY, int xDirection, bool* hammerUsed) {
 	state = HammerState::HalfDeployed;
 }
 
+// This function advances the swing's state machine by one tick
 void Hammer::updateState() {
 	switch (state) {
 		case HammerState::HalfDeployed:
@@ -60,6 +62,7 @@ void Hammer::updateState() {
 	}
 }
 
+// This function erases both cells of the swing from the board and from the console, skipping cells that were out of bounds
 void Hammer::grab() const {
 	for (int i = 0; i < 2; ++i) {
 		if (hammerPosX[i] == -1)
@@ -70,6 +73,7 @@ void Hammer::grab() const {
 	}
 }
 
+// This function receives the radius of the swing cell, and prints the hammer's icon there, and does nothing in silent mode or if the cell is out of bounds
 void Hammer::draw(int radius) const {
 	if (board.isSilent() || hammerPosX[radius] == -1)
 		return;
@@ -81,6 +85,7 @@ void Hammer::draw(int radius) const {
 		std::cout << HAMMER_ICON;
 }
 
+// This function receives the radius of the swing cell, and restores on the board the char that was there before the swing, or the level's original char if an enemy was standing there
 void Hammer::eraseHammerCharsFromBoard(int radius) const {
 	if (prevHammerChars[radius] == Barrel::BARREL_ICON || prevHammerChars[radius] == SmallGhost::SMALL_GHOST_ICON
 		|| prevHammerChars[radius] == BigGhost::BIG_GHOST_ICON) {
@@ -95,6 +100,7 @@ void Hammer::eraseHammerCharsFromBoard(int radius) const {
 		board.setBoardChar(hammerPosX[radius], hammerPosY, prevHammerChars[radius]);
 }
 
+// This function receives the radius of the swing cell, and prints back on the console the char that was there before the swing, or the level's original char if an enemy was standing there, and does nothing in silent mode
 void Hammer::eraseHammerCharsFromConsole(int radius) const {
 	if (board.isSilent())
 		return;
@@ -117,13 +123,4 @@ void Hammer::eraseHammerCharsFromConsole(int radius) const {
 		Board::printCharWithColor(charToPrint);
 	else
 		std::cout << charToPrint;
-}
-
-void Hammer::reset() {
-	std::memset(hammerPosX, -1, sizeof(hammerPosX)); // Reset to an invalid position
-	std::memset(prevHammerChars, Board::EMPTY, sizeof(prevHammerChars)); // Reset previous chars to empty
-
-	isCollected = false;
-	hammerPosY = -1;
-	state = HammerState::Idle;
 }

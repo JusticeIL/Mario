@@ -9,6 +9,8 @@
 #include "FileVerifier.h"
 #include "GameManager.h"
 
+using std::string;
+
 int main(int argc, char* argv[]) {
 	ShowConsoleCursor(false);
 
@@ -43,12 +45,12 @@ int main(int argc, char* argv[]) {
 			clearScr();
 
 			if (isSilent) {
-				std::string passMsg1 = "Test Passed:";
-				std::string passMsg2 = "All results matched the expected output!";
+				string passMsg1 = "Test Passed:";
+				string passMsg2 = "All results matched the expected output!";
 
-				int startX1 = (GameManager::MAX_X - static_cast<int>(passMsg1.length())) / 2;
-				int startX2 = (GameManager::MAX_X - static_cast<int>(passMsg2.length())) / 2;
-				int startY = GameManager::MAX_Y / 2;
+				int startX1 = (Board::MAX_X - static_cast<int>(passMsg1.length())) / 2;
+				int startX2 = (Board::MAX_X - static_cast<int>(passMsg2.length())) / 2;
+				int startY = Board::MAX_Y / 2;
 
 				gotoxy(startX1, startY - 1);
 				std::cout << GREEN << passMsg1 << RESET << std::endl;
@@ -58,9 +60,9 @@ int main(int argc, char* argv[]) {
 		}
 		catch (const std::exception& e) {
 			if (isSilent) {
-				std::string errMsg = e.what();
-				int startX = (GameManager::MAX_X - static_cast<int>(errMsg.length())) / 2;
-				int startY = GameManager::MAX_Y / 2;
+				string errMsg = e.what();
+				int startX = (Board::MAX_X - static_cast<int>(errMsg.length())) / 2;
+				int startY = Board::MAX_Y / 2;
 				
 				if (startX < 0) // Case: error message is too long for the console width
 					startX = 0;
@@ -85,6 +87,6 @@ int main(int argc, char* argv[]) {
 	delete renderer;
 	delete observer;
 
-	gotoxy(0, GameManager::MAX_Y - 3);
+	gotoxy(0, Board::MAX_Y - 3);
 	return 0;
 }

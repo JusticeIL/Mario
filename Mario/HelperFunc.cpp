@@ -2,6 +2,8 @@
 #include <windows.h>
 #include "HelperFunc.h"
 
+using std::string;
+
 // This function moves the cursor to a specified position in the console window
 void gotoxy(int x, int y) {
     std::cout.flush();
@@ -25,9 +27,10 @@ void clearScr() {
     system("cls");
 }
 
+// This function receives command line count and arguments, and turns on the game modes given in the command line 
 void chooseGameMode(int argc, char* argv[], bool& isLoad, bool& isSave, bool& isSilent) {
     for (int i = 1; i < argc; ++i) {
-        std::string command = argv[i];
+        string command = argv[i];
 
         if (command == "-load") // Case: load
             isLoad = true;
@@ -41,7 +44,8 @@ void chooseGameMode(int argc, char* argv[], bool& isLoad, bool& isSave, bool& is
         isSave = false;
 }
 
-std::string getBaseName(const std::string& filename) {
+// This function receives filename, and returns it without its extension
+string getBaseName(const string& filename) {
     size_t dotPos = filename.find_last_of('.');
     if (dotPos != std::string::npos)
         return filename.substr(0, dotPos);

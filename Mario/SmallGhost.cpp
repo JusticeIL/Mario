@@ -1,6 +1,7 @@
 #include "SmallGhost.h"
 #include "Board.h"
 
+// This function returns true if the ghost's next position is inside the board, holds a char it can enter and has a floor under it, and false otherwise
 bool SmallGhost::isValidToMove() {
 	int nextPosX = x + currDirX;
 	int nextPosY = y + currDirY;
@@ -24,6 +25,7 @@ bool SmallGhost::isValidToMove() {
 	return Enemy::isValidToMove();
 }
 
+// This function performs the small ghost's whole turn: erasing it from its old position, setting its direction, turning it around when it is blocked, moving and drawing it again
 void SmallGhost::move() {
 	calculatePrevPos();
 	eraseFromBoard();
@@ -47,6 +49,7 @@ void SmallGhost::move() {
 	drawToConsole();
 }
 
+// This function flips the ghost's direction with probability 0.95 of continuing in the same direction as their previous step, and 0.05 for changing direction
 void SmallGhost::setDirection() {
 	unsigned num = getRandomNumber() % 100;
 

@@ -6,21 +6,35 @@ class Board;
 class Asset {
 
 protected:
-	int prevPosX;
+	// Position
 	int x;
-	int currDirX;
-	int prevPosY;
 	int y;
-	int currDirY;
-	char prevCh;
-	char icon;
-	const bool& isColor;
-	const char* color;
 
-	// Board
+	// Direction and movement control
+	int currDirX;
+	int currDirY;
+
+	// Previous position tracking
+	int prevPosX;
+	int prevPosY;
+	char prevCh;
+
+	// Appearance
+	const char* color;
+	const bool& isColor;
+	char icon;
+
+	// Game board reference
 	Board& board;
 
 	Asset(int x, int y, char symbol, const char* color, Board& b, bool& isColor);
+
+	// Saves the current position before the asset moves
+	void calculatePrevPos();
+
+	// Erasing
+	void eraseFromConsole() const;
+	void eraseFromBoard() const;
 
 public:
 	virtual ~Asset() {
@@ -28,11 +42,9 @@ public:
 		eraseFromConsole();
 	}
 
-	void calculatePrevPos();
+	// Drawing
 	virtual void drawToConsole() const = 0;
 	virtual void drawToBoard() = 0;
-	void eraseFromConsole() const;
-	void eraseFromBoard() const;
 
 	// Getters
 	int getX() const { return x; }

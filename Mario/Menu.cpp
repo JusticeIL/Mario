@@ -3,9 +3,13 @@
 #include <conio.h>
 #include <vector>
 #include "Menu.h"
+#include "Board.h"
 #include "Colors.h"
 #include "Mario.h"
 #include "Pauline.h"
+
+using std::string;
+using std::vector;
 
 // This function manages the main game loop, handles transitions between different game states, and coordinates user inputs and game actions
 void Menu::run() {
@@ -77,7 +81,6 @@ void Menu::run() {
 				resetAllArrows();
 				firstPrint = true;
 				break;
-				
 			case INSTRUCTIONS_CH: // Instructions
 				state = GameState::Instructions;
 				ResetMenu();
@@ -93,6 +96,7 @@ void Menu::run() {
 			case EXIT_CH: // Exit
 				clearScr();
 				state = GameState::Exit;
+				playExitSound();
 				break;
 			}
 		}
@@ -127,8 +131,8 @@ void Menu::run() {
 	}
 }
 
+// This function prints the screen that matches the current state
 void Menu::printScreens() {
-
 	switch (state) {
 	case GameState::SelectLevel:
 	case GameState::Instructions:
@@ -223,7 +227,7 @@ void Menu::handleState() {
 				else if (pressedKey == '7') {
 					difficultyLevel = (difficultyLevel == Difficulty::Easy) ? Difficulty::Hard : Difficulty::Easy; // Toggle difficulty level
 					gotoxy(DIFFICULTY_POS.x, DIFFICULTY_POS.y);
-					std::cout << std::string(10, ' '); // Clear message
+					std::cout << string(10, ' '); // Clear message
 					gotoxy(DIFFICULTY_POS.x, DIFFICULTY_POS.y);
 					std::cout << (difficultyLevel == Difficulty::Easy ? "Easy" : "Hard");
 					gameManager.setDelayTimer((difficultyLevel == Difficulty::Hard) ? 50 : 150);
@@ -245,13 +249,13 @@ void Menu::handleState() {
 		if (messageOnScreen && GetTickCount() - messageTimestamp >= 2000)
 		{
 			gotoxy(27, 10);
-			std::cout << std::string(30, ' '); // Clear message
+			std::cout << string(30, ' '); // Clear message
 			messageOnScreen = false;
 		}
 	}
 }
 
-// This function handles user input in the menu, updates the selected option, and manages the menu display
+// This function handles user input in the menu, moves the arrow to the chosen option, and returns the char of the option that was confirmed with ENTER
 char Menu::handleMenu() {
 
     while (true) {
@@ -267,9 +271,6 @@ char Menu::handleMenu() {
             if ((MenuInput == '\n' || MenuInput == '\r') && isArrow) { // Only after arrow is showing & player pressed ENTER
                 chosen = true;
 
-                if (menuChar == ESC_CH)
-                    gotoxy(0, 26);
-
                 clearScr();
                 return menuChar;
             }
@@ -278,6 +279,7 @@ char Menu::handleMenu() {
     }
 }
 
+// This function prints the instructions screen with the game's movement keys and Pauline's icon in their places
 void Menu::printInstructionsScreen() const {
 	gotoxy(0, 0);
 	std::cout << instructionsScreen;
@@ -296,9 +298,10 @@ void Menu::printInstructionsScreen() const {
 	std::cout << Pauline::PAULINE_ICON;
 }
 
+// This function receives the current page number, and prints the errors of the matching screen file centered on the log screen, or a success message if no file failed to load
 void Menu::printConsoleLogScreen(size_t currentErrorPage) {
 	// 1. Clean the inner screen (using ' ' to wipe previous messages)
-	std::string blankLine(76, ' ');
+	string blankLine(76, ' ');
 	for (int i = 5; i <= 20; ++i) {
 		gotoxy(2, i);
 		std::cout << blankLine;
@@ -308,14 +311,14 @@ void Menu::printConsoleLogScreen(size_t currentErrorPage) {
 
 	// 2. Handle perfect loads (no errors)
 	if (errorLog.empty()) {
-		const std::string successMsg = "No errors found! All screens loaded successfully.";
-		int startX = (GameManager::MAX_X - static_cast<int>(successMsg.length())) / 2;
+		const string successMsg = "No errors found! All screens loaded successfully.";
+		int startX = (Board::MAX_X - static_cast<int>(successMsg.length())) / 2;
 		gotoxy(startX, 10);
 		std::cout << GREEN << successMsg << RESET;
 	}
 	else {
 		// 3. Convert unordered_map to a vector to index pages
-		std::vector<std::pair<std::string, std::string>> pages(errorLog.begin(), errorLog.end());
+		vector<std::pair<string, string>> pages(errorLog.begin(), errorLog.end());
 
 		size_t safePage = currentErrorPage;
 
@@ -326,18 +329,18 @@ void Menu::printConsoleLogScreen(size_t currentErrorPage) {
 
 		// Print the title at line 5, exactly in the middle.
 		// Assuming the title length is 15 exactly (e.g. "dkong_01.screen")
-		int titleStartX = (GameManager::MAX_X - 15) / 2;
+		int titleStartX = (Board::MAX_X - 15) / 2;
 		gotoxy(titleStartX, 5);
 		std::cout << currentPageData.first;
 
 		// 4. Format the text for the CURRENT page dynamically
-		std::vector<std::string> displayLines;
-		const std::string& errors = currentPageData.second;
+		vector<string> displayLines;
+		const string& errors = currentPageData.second;
 		size_t startPos = 0;
 		size_t newlinePos = errors.find('\n');
 
 		// Slice up to the newline characters
-		while (newlinePos != std::string::npos) {
+		while (newlinePos != string::npos) {
 			displayLines.push_back(errors.substr(startPos, newlinePos - startPos));
 			startPos = newlinePos + 1;
 			newlinePos = errors.find('\n', startPos);
@@ -348,19 +351,19 @@ void Menu::printConsoleLogScreen(size_t currentErrorPage) {
 
 		// 5. Find the absolute longest line to calculate dead-center alignment
 		size_t maxLength = 0;
-		for (const std::string& line : displayLines) {
+		for (const string& line : displayLines) {
 			if (line.length() > maxLength)
 				maxLength = line.length();
 		}
 
-		int startX = (GameManager::MAX_X - static_cast<int>(maxLength)) / 2;
+		int startX = (Board::MAX_X - static_cast<int>(maxLength)) / 2;
 		if (startX < 2) // Case: error string is too long
 			startX = 2;
 
 		// 6. Print the aligned block starting from line 7
 		int currentY = 7;
 		std::cout << RED;
-		for (const std::string& line : displayLines) {
+		for (const string& line : displayLines) {
 			if (currentY >= 20) {
 				gotoxy(startX, currentY);
 				std::cout << RESET;
@@ -375,6 +378,7 @@ void Menu::printConsoleLogScreen(size_t currentErrorPage) {
 	}
 }
 
+// This function receives the current page number as a reference, and flips it back and forth between the error pages according to the player's keys, or goes back to the options screen
 void Menu::handleConsoleLogInput(size_t& currentErrorPage) {
 	const auto& errorLog = gameManager.getErrorLog();
 	char userChoice = '\0';
@@ -407,7 +411,7 @@ void Menu::handleConsoleLogInput(size_t& currentErrorPage) {
 	}
 }
 
-// This function receives a numeric key (as a character), updates the menu arrow position, and prints it
+// This function receives the numeric key of a menu option, and moves the arrow to that option's position
 void Menu::MoveArrow(char numKey) const {
 
     resetAllArrows(); // Reset all
@@ -432,7 +436,7 @@ void Menu::MoveArrow(char numKey) const {
     std::cout << arrow;
 }
 
-// This function erases all arrows in the menu
+// This function erases the arrows from all the main menu's options
 void Menu::resetAllArrows() const {
 
     for (int i = 0; i < std::size(positions); i++) {
@@ -441,6 +445,7 @@ void Menu::resetAllArrows() const {
     }
 }
 
+// This function receives the key the player pressed on the select level screen, and moves the selection, starts the chosen level or goes back to the main menu accordingly
 void Menu::handleSelectLevelInput(char pressedKey) {
 	int totalLevels = static_cast<int>(gameManager.getLevels().size());
 	char toLowerPressedKey = static_cast<char>(tolower(pressedKey));
@@ -492,12 +497,13 @@ void Menu::handleSelectLevelInput(char pressedKey) {
 		updateSelectLevelArrow(oldIndex, selectedLevelIndex);
 }
 
+// This function receives the old and the new selected level indexes, and moves the arrow between their lines
 void Menu::updateSelectLevelArrow(int oldIndex, int newIndex) const {
-	gotoxy(5, 5 + (oldIndex * 2)); // 1. Erase the old arrow
-	std::cout << ' ';
+	gotoxy(5, 5 + (oldIndex * 2));
+	std::cout << ' '; // 1. Erase the old arrow
 
-	gotoxy(5, 5 + (newIndex * 2)); // 2. Draw the new arrow
-	std::cout << arrow;
+	gotoxy(5, 5 + (newIndex * 2));
+	std::cout << arrow; // 2. Draw the new arrow
 }
 
 // This function prints "OK!" in green with a blinking effect
@@ -526,10 +532,11 @@ void Menu::printOKInGreen() const {
 	std::cout << "   ";
 }
 
+// This function shows the game over screen
 void Menu::gameOverLogic() {
 	clearScr();
 	printGameOverScreen();
-	// playWinSound();
+	playLoseSound();
 	Sleep(1000);
 	state = GameState::MainMenu;
 	firstPrint = true;
@@ -538,10 +545,11 @@ void Menu::gameOverLogic() {
 	clearScr();
 }
 
+// This function shows the game won screen
 void Menu::gameWonLogic() {
 	clearScr();
 	printGameWonScreen();
-	// playWinSound();
+	playWinSound();
 	Sleep(1000);
 	state = GameState::MainMenu;
 	firstPrint = true;
@@ -550,6 +558,7 @@ void Menu::gameWonLogic() {
 	clearScr();
 }
 
+// This function starts a fresh game run and clears the menu's state before the gameplay begins
 void Menu::gameReset() {
 	// Tell the GameManager to prepare a fresh board, enemies, and Mario states
 	gameManager.startNewGame();
@@ -559,26 +568,37 @@ void Menu::gameReset() {
 	resetAllArrows();
 }
 
-// This function plays the melody of "Twinkle Twinkle Little Star" (while game over) using the Beep function
+// This function plays the melody of Handel's "See, the Conquering Hero Comes" (while game win) using the Beep function
 void Menu::playWinSound() const {
-	// Twinkle Twinkle Little Star
-	Beep(523, 500);  // C5 for 500ms
-	Beep(523, 500);  // C5 for 500ms
-	Beep(784, 500);  // G5 for 500ms
-	Beep(784, 500);  // G5 for 500ms
-	Beep(880, 500);  // A5 for 500ms
-	Beep(880, 500);  // A5 for 500ms
-	Beep(784, 700); // G5 for 1000ms
+	// See, the Conquering Hero Comes (Handel, Judas Maccabaeus) - opening phrase in G major
+	Beep(988, 220);  // B5  - "See,"
+	Beep(988, 220);  // B5  - "the"
+	Beep(880, 220);  // A5  - "con-"
+	Beep(784, 220);  // G5  - "qu'ring"
+	Beep(880, 220);  // A5  - "he-"
+	Beep(988, 220);  // B5  - "ro"
+	Beep(784, 450);  // G5  - "comes!"
 
-	Sleep(300);      // Pause
+	Sleep(100);         // Pause
 
-	Beep(659, 500);  // F5 for 500ms
-	Beep(659, 500);  // F5 for 500ms
-	Beep(587, 500);  // D5 for 500ms
-	Beep(587, 500);  // D5 for 500ms
-	Beep(523, 500);  // C5 for 500ms
-	Beep(523, 500);  // C5 for 500ms
-	Beep(587, 500);  // D5 for 500ms
+	Beep(988, 220);  // B5  - Trumpet lift
+	Beep(1175, 650); // D6  - Final held note
+}
+
+// This function plays the melody of Chopin's "Funeral March" (while game over) using the Beep function
+void Menu::playLoseSound() const {
+	// Funeral March (Chopin, Piano Sonata No. 2) - opening phrase in Bb minor
+	Beep(466, 450);  // Bb4 - Long
+	Beep(466, 200);  // Bb4 - Short
+	Beep(466, 320);  // Bb4
+	Beep(466, 200);  // Bb4
+
+	Sleep(80);          // Pause
+
+	Beep(554, 450);  // Db5 - Long
+	Beep(523, 260);  // C5
+	Beep(523, 200);  // C5
+	Beep(466, 700);  // Bb4 - Final held note
 }
 
 // This function plays a short sound effect for exiting the game using the Beep function
@@ -589,6 +609,7 @@ void Menu::playExitSound() const {
 	Beep(1200, 50);
 }
 
+// This function prints the select level screen with all the loaded levels, marking the selected one with an arrow
 void Menu::printSelectLevelScreen() const {
 	gotoxy(0, 0);
 	std::cout << selectLevelScreen;

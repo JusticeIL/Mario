@@ -1,22 +1,23 @@
 #pragma once
 #include "Barrel.h"
-#include "Colors.h"
 
 // Forward declaration
 class Board;
 
 class BarrelFactory {
-
-	static constexpr const char* BARREL_COLOR = BROWN;
-	bool& isColor;
-	int creationPosX;
-	int creationPosY;
+	// References to other objects
 	Board& board;
 
-	enum class BarrelDirection : int { Init = 0, Left = -1, Right = 1, Down = -1 };
-	BarrelDirection barrelDirection = BarrelDirection::Init;
+	// Reference to the color mode
+	bool& isColor;
+
+	// Spawn point
+	int creationPosX;
+	int creationPosY;
 
 public:
 	BarrelFactory(int dkx, int dky, Board& b, bool& isColor); // Constructor
-	Barrel* spawnBarrel() const { return new Barrel(creationPosX, creationPosY, board, isColor); }
+
+	// Barrel creation
+	Barrel spawnBarrel() const { return Barrel(creationPosX, creationPosY, board, isColor); }
 };
